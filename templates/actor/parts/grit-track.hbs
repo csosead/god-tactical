@@ -1,34 +1,42 @@
 {{!-- Bonus GRIT-cell block (Фокус, renamed to "GRIT") — a flat total, no armor involved:
      a Character's own base pool (GOD.BASE_GRIT/system.baseGrit), or an NPC's GM-set
      NPCDataModel.gritMax. Shared by the Character and NPC sheets, and rendered standalone
-     by #patchGritTrack() (actor-sheet.mjs/npc-sheet.mjs) so click/crack/repair/max-±
+     by #patchGritTrack() (actor-sheet.mjs/npc-sheet.mjs) so click/burn/repair/max-±
      actions can patch just this block instead of re-rendering the whole sheet.
 
      Numeric counter, no text label (2026-08-24 — the mask icon alone stands in for the
-     old "GRIT" caption, see its own data-tooltip below). Direct click-on-the-number
-     interaction, no buttons: LMB on the whole-value spends one point, RMB restores one;
-     LMB on the max lowers the pool by one, RMB raises it — same scheme on both fields,
-     always live (not gated behind edit mode, unlike the old +/- buttons it replaces).
-     The cracked indicator is its own small always-visible badge (dim at 0, red once
-     something's actually broken) so its own LMB-repair/RMB-break gestures never collide
-     with the whole/max fields' meanings. See #onGritWholeClick/#onGritWholeContextMenu/
-     #onGritMaxClick/#onGritMaxContextMenu/#onGritCrackRepairClick/#onGritCrackBreakClick
-     in actor-sheet.mjs/npc-sheet.mjs.
+     old "GRIT" caption, see its own data-tooltip below). LMB on the whole-value spends
+     one point, RMB restores one (temporary — same scene). LMB on the max field burns
+     one cell PERMANENTLY (book flavor: GRIT burns, it doesn't "crack" — see
+     wounds.mjs's getGritCells doc comment), RMB repairs one — the max field itself
+     shows the reduced ceiling (gritTrack.effectiveMax = count - cracked), no separate
+     indicator. Resizing the RAW pool (the actor's own baseGrit/gritMax) is a
+     character-build action, not a play-time one — deliberately edit-mode-only via the
+     dashed "+"/"-" pair, same idiom as Жизни's own max buttons (wound-track.hbs). See
+     #onGritWholeClick/#onGritWholeContextMenu/#onGritBurnClick/#onGritRepairClick/
+     #onGritMaxAddClick/#onGritMaxSubtractClick in actor-sheet.mjs/npc-sheet.mjs.
 
      Guard is "has at least one cell OR we're in edit mode" (not hasGrit alone) — an NPC
      with gritMax still at 0 has nothing to show, but edit mode still needs the block to
-     exist so its max field is reachable (RMB) to raise it off 0 in the first place;
-     outside edit mode with zero cells there's nothing to click at all, so it's hidden. --}}
+     exist so its own max "+"/"-" (below) are reachable to raise it off 0 in the first
+     place; outside edit mode with zero cells there's nothing to click at all, so it's
+     hidden. Max "-" clamps at 0, never rendered disabled at the floor — just a no-op
+     past it, same as max "+" has no rendered ceiling either. --}}
 {{#if (or gritTrack.hasGrit editMode)}}
 <div class="grit-track">
   <div class="grit-counter-row">
     <i class="grit-icon-badge" data-tooltip="GRIT" data-tooltip-direction="UP"></i>
-    <span class="grit-counter-value" data-tooltip="ЛКМ — потратить, ПКМ — восстановить" data-tooltip-direction="UP">{{gritTrack.whole}}</span>
+    <span class="grit-counter-value" data-tooltip="ЛКМ — сжечь, ПКМ — восстановить" data-tooltip-direction="UP">{{gritTrack.whole}}</span>
     <span class="grit-counter-sep">/</span>
-    <span class="grit-counter-max" data-tooltip="ЛКМ — уменьшить максимум, ПКМ — увеличить" data-tooltip-direction="UP">{{gritTrack.count}}</span>
-    <span class="grit-cracked-indicator{{#if gritTrack.cracked}} has-cracked{{/if}}" data-tooltip="Треснуло: {{gritTrack.cracked}} — ЛКМ чинит, ПКМ ломает" data-tooltip-direction="UP">
-      <i class="fas fa-bolt"></i>{{gritTrack.cracked}}
-    </span>
+    <span class="grit-counter-max{{#if gritTrack.cracked}} has-cracked{{/if}}" data-tooltip="ЛКМ — сжечь клетку насовсем, ПКМ — починить{{#if gritTrack.cracked}} (сожжено: {{gritTrack.cracked}}){{/if}}" data-tooltip-direction="UP">{{gritTrack.effectiveMax}}</span>
+    {{#if editMode}}
+    <button type="button" class="grit-max-sub" title="Уменьшить максимум GRIT на 1">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <button type="button" class="grit-max-add" title="Увеличить максимум GRIT на 1">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    {{/if}}
   </div>
 </div>
 {{/if}}

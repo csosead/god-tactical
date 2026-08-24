@@ -1444,9 +1444,12 @@
   gap: 6px;
 }
 
-/* Plain flat heart symbol (replaces the old life-heart.png claws-and-gem art, per
- * feedback — "обычный символ") — drawn with a ::before instead of a background-image,
- * shared by both the Character and NPC sheets. */
+/* Heart glyph (2026-08-24 — swapped the Unicode ❤ text glyph for a painted PNG,
+ * assets/images/life-heart.png, matching GRIT's own mask-icon treatment; shared by
+ * both the Character and NPC sheets). Sized in `em` on the ::before rather than fixed
+ * pixels, so it stays in lockstep with .wound-mark's own font-size — the smaller
+ * .npc-top-stats variant further down only needs to override font-size, not this rule
+ * too. */
 .god-tactical .wound-mark {
   width: 24px;
   height: 24px;
@@ -1459,15 +1462,14 @@
   transition: opacity 0.15s, filter 0.15s;
 }
 .god-tactical .wound-mark::before {
-  /* U+2764 + U+FE0E (text-presentation selector) — forces the flat glyph instead of a
-   * colorful emoji image on platforms that would otherwise substitute one, so `color`
-   * below actually applies. font-size is inherited from .wound-mark (sized in em-like
-   * lockstep with it via the shared property) rather than fixed here, so the smaller
-   * .npc-top-stats variant further down scales correctly instead of vertically
-   * misaligning against a hardcoded box height. */
-  content: "\2764\FE0E";
-  color: #c81e2b;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  content: "";
+  display: block;
+  width: 1em;
+  height: 1em;
+  background-image: url("../assets/images/life-heart.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 .god-tactical .wound-mark:hover { opacity: 0.85; }
 
@@ -1478,12 +1480,17 @@
   filter: grayscale(1);
 }
 
-/* Edit-mode-only "+"/"-" pair at the end of a Жизни row (wound-track.hbs) — raise/lower
- * the attached species item's woundSteps by one (see actor-sheet.mjs's/npc-sheet.mjs's
- * #onWoundMaxAddClick/#onWoundMaxSubtractClick). GRIT's own max no longer uses buttons
- * — LMB/RMB directly on .grit-counter-max instead, see further down. Same 24×24
- * footprint as .wound-mark so they sit inline with it, but a dashed outline instead of
- * a filled glyph — reads as "adjust the slot count", not as a state of an existing one. */
+/* Edit-mode-only "+"/"-" pair at the end of a GRIT/Жизни row (grit-track.hbs/wound-
+ * track.hbs) — raise/lower that track's own RAW pool by one (system.baseGrit/gritMax,
+ * or the attached species item's woundSteps — see actor-sheet.mjs's/npc-sheet.mjs's
+ * #onGritMaxAddClick/#onGritMaxSubtractClick/#onWoundMaxAddClick/#onWoundMaxSubtractClick).
+ * Deliberately edit-mode only — resizing the pool itself is a character-build decision,
+ * not a play-time action (2026-08-24, reinstated after a brief always-live LMB/RMB
+ * detour on .grit-counter-max, per user feedback). Same 24×24 footprint as .grit-mark/
+ * .wound-mark so they sit inline with them, but a dashed outline instead of a filled
+ * glyph — reads as "adjust the slot count", not as a state of an existing one. */
+.god-tactical .grit-max-add,
+.god-tactical .grit-max-sub,
 .god-tactical .wound-max-add,
 .god-tactical .wound-max-sub {
   width: 24px;
@@ -1500,6 +1507,8 @@
   padding: 0;
   transition: color 0.15s, border-color 0.15s;
 }
+.god-tactical .grit-max-add:hover,
+.god-tactical .grit-max-sub:hover,
 .god-tactical .wound-max-add:hover,
 .god-tactical .wound-max-sub:hover {
   color: var(--ink);
@@ -1539,14 +1548,15 @@
 }
 
 /* Numeric GRIT counter — fixed footprint at any pool size. LMB/RMB directly on the
- * value/max spans spend-restore / lower-raise, no buttons — see actor-sheet.mjs's/
- * npc-sheet.mjs's #onGritWholeClick/#onGritWholeContextMenu/#onGritMaxClick/
- * #onGritMaxContextMenu. */
+ * whole-value span spends/restores one point; LMB/RMB on the max span burns/repairs
+ * one cell PERMANENTLY, its own text turning red (.has-cracked) once anything's
+ * burned — no separate indicator, see actor-sheet.mjs's/npc-sheet.mjs's
+ * #onGritWholeClick/#onGritWholeContextMenu/#onGritBurnClick/#onGritRepairClick. */
 .god-tactical .grit-counter-value,
 .god-tactical .grit-counter-max {
   cursor: pointer;
   border-radius: 3px;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 .god-tactical .grit-counter-value:hover,
 .god-tactical .grit-counter-max:hover {
@@ -1568,34 +1578,14 @@
 .god-tactical .grit-counter-max {
   padding: 1px 4px;
   font-size: 14px;
+  font-weight: 700;
   color: var(--ink-3);
 }
-
-/* Треснуло — count of broken cells. Its own small always-visible indicator (so its
- * LMB-repair/RMB-break gestures never collide with the value/max spans' own meanings)
- * — dim/muted at 0, red once something's actually broken (.has-cracked). */
-.god-tactical .grit-cracked-indicator {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  color: var(--ink-3);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.god-tactical .grit-cracked-indicator:hover {
-  background: rgba(255,255,255,0.1);
-}
-.god-tactical .grit-cracked-indicator.has-cracked {
-  background: rgba(176,48,48,0.18);
+.god-tactical .grit-counter-max.has-cracked {
   color: var(--blood, #cc3333);
 }
-.god-tactical .grit-cracked-indicator.has-cracked:hover {
-  background: rgba(176,48,48,0.32);
+.god-tactical .grit-counter-max.has-cracked:hover {
+  background: rgba(176,48,48,0.18);
 }
 
 /* ============================================ */
@@ -3950,10 +3940,8 @@
 .god-tactical .npc-top-stats .grit-counter-max {
   font-size: 10px;
 }
-.god-tactical .npc-top-stats .grit-cracked-indicator {
-  font-size: 9px;
-  padding: 1px 4px;
-}
+.god-tactical .npc-top-stats .grit-max-add,
+.god-tactical .npc-top-stats .grit-max-sub,
 .god-tactical .npc-top-stats .wound-max-add,
 .god-tactical .npc-top-stats .wound-max-sub {
   width: 14px;
