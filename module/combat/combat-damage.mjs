@@ -32,13 +32,16 @@ export function isAttackSkill(skillKey) {
   return ATTACK_SKILLS.has(skillKey);
 }
 
-/** Damage bonus from the KEPT d100 result: `roll / 20` rounded UP — 05 → +1, 48 → +3, 95 → +5.
- *  The bonus grows the higher you roll under your skill; a non-positive / blank roll → 0.
- *  Only meaningful on a success tier (there the roll is ≤ skill); fail/fiasco ignore it. */
-export function rollBonus(rollValue) {
+/** Damage bonus from the KEPT d100 result: `roll / divisor` rounded UP — divisor 20 (the
+ *  default, used by weapon damage and Fortitude): 05 → +1, 48 → +3, 95 → +5. Dodge rolls
+ *  pass divisor 10 (book: "Уклонение = ловкость/10" — twice as steep as Fortitude/attack
+ *  damage's ÷20, see COMBAT-REDESIGN.md). The bonus grows the higher you roll under your
+ *  skill; a non-positive / blank roll → 0. Only meaningful on a success tier (there the
+ *  roll is ≤ skill); fail/fiasco ignore it. */
+export function rollBonus(rollValue, divisor = 20) {
   const r = Number(rollValue);
   if (!Number.isFinite(r) || r <= 0) return 0;
-  return Math.ceil(r / 20);
+  return Math.ceil(r / divisor);
 }
 
 /** Which of the Class item's 4 base-damage fields (baseMelee/baseRanged/

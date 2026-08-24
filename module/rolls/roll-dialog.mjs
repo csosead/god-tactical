@@ -11,9 +11,10 @@ import { coverTargetsForShooter } from "../canvas/attack-cover-targets.mjs";
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
 // Выносливость (endurance) rolls a Fortitude value, Ловкость (agility) rolls a Dodge
-// value — same damage-tier formula as an attack (see combat-damage.mjs's
-// damageForTier), just off the Class item's own dodgeBase/fortitudeBase instead of its
-// weapon-damage `base`. See _finalizeRoll's defenseKind block below. (2026-08-19
+// value — same damage-TIER formula as an attack (see combat-damage.mjs's damageForTier),
+// but NOT the same bonus divisor: Fortitude uses the attack's ÷20, Dodge uses ÷10 (book:
+// "Уклонение = ловкость/10" — twice as steep as Fortitude, see COMBAT-REDESIGN.md and
+// combat-damage.mjs's rollBonus). See _finalizeRoll's defenseKind block below. (2026-08-19
 // characteristic restructure — Плотность retired, its Fortitude role moved to
 // Выносливость/endurance, formerly Ресурс; see config.mjs's GOD.SKILL_MAP.)
 const DEFENSE_SKILLS = { endurance: "fortitude", agility: "dodge" };
@@ -222,7 +223,7 @@ export class GODRollDialog extends HandlebarsApplicationMixin(
     const defenseKind = !this.data.isChar ? DEFENSE_SKILLS[this.data.skillKey] : null;
     if (defenseKind) {
       const base = Number(this.actor?.system?.defense?.[defenseKind]) || 0;
-      const bonus = rollBonus(roll.godResult.chosen);
+      const bonus = rollBonus(roll.godResult.chosen, defenseKind === "dodge" ? 10 : 20);
       roll.godResult.defenseKind = defenseKind;
       roll.godResult.defenseLabel = DEFENSE_LABEL[defenseKind];
       roll.godResult.defenseBase = base;
@@ -381,7 +382,7 @@ async function _applyCompetency(message) {
   // Same Triumph-recompute as attack damage above, for a Fortitude/Dodge roll
   // (defenseKind block in _finalizeRoll) — peak-of-skill bonus, not the rolled one.
   if (result.defenseBase !== undefined) {
-    const maxBonus = rollBonus(result.skill);
+    const maxBonus = rollBonus(result.skill, result.defenseKind === "dodge" ? 10 : 20);
     result.defenseValue = damageForTier({ base: result.defenseBase, bonus: maxBonus, outcome: "triumph" });
   }
 

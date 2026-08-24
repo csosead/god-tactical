@@ -24,6 +24,14 @@ test("rollBonus floors non-positive / blank / non-numeric to 0", () => {
   }
 });
 
+test("rollBonus with divisor 10 (Dodge, book: ловкость/10 — twice as steep as Fortitude's ÷20)", () => {
+  assert.equal(rollBonus(5, 10), 1);    // 01–10 → +1
+  assert.equal(rollBonus(10, 10), 1);
+  assert.equal(rollBonus(11, 10), 2);   // 11–20 → +2
+  assert.equal(rollBonus(48, 10), 5);
+  assert.equal(rollBonus(95, 10), 10);
+});
+
 test("damage ladder — base 4, roll 05 (bonus 1) → success 5", () => {
   const p = { base: 4, roll: 5 };
   assert.equal(computeAttackDamage({ ...p, outcome: "fiasco" }), 1);
