@@ -1,0 +1,32 @@
+{{!-- Wound/lives track (Жизни) — shared by the Character and NPC sheets, rendered
+     standalone by #patchWoundTrack() (actor-sheet.mjs/npc-sheet.mjs) so a wound-mark
+     click can patch just this block instead of re-rendering the whole sheet (which was
+     resetting the sheet's scroll position — see #onWoundMarkClick).
+
+     Guard stays hasTrack-only (unlike grit-track.hbs's own edit-mode guard) — hasTrack
+     is false only when there's no species (Race/Creature) item attached at all, and the
+     "+"/"-" below raise/lower that item's OWN woundSteps field, so without one there's
+     nothing for them to act on regardless of edit mode. "-" clamps at 1 (that field's own
+     schema min, items.mjs) — a species always has at least one life. --}}
+{{#if woundTrack.hasTrack}}
+<div class="wound-track">
+  <div class="wound-track-head">
+    <span class="wound-track-label">Жизни</span>
+    {{#if woundTrack.badgeLabel}}<span class="wound-track-state">{{woundTrack.badgeLabel}}</span>{{/if}}
+  </div>
+  <div class="wound-marks">
+    {{#each woundTrack.boxes as |box|}}
+    <div class="wound-mark {{#if box.filled}}filled{{/if}}"
+         data-index="{{box.index}}" data-tooltip="{{box.title}}" data-tooltip-direction="UP"></div>
+    {{/each}}
+    {{#if editMode}}
+    <button type="button" class="wound-max-sub" title="Уменьшить максимум Жизней на 1">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <button type="button" class="wound-max-add" title="Увеличить максимум Жизней на 1">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    {{/if}}
+  </div>
+</div>
+{{/if}}

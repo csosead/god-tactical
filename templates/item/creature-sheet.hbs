@@ -1,0 +1,56 @@
+<div class="equip-sheet creature-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+      </div>
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-weight-hanging"></i>
+          {{#if isEditing}}
+            <select name="system.weight">{{selectOptions weights selected=system.weight valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{weightLabel}}</span>{{/if}}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Wound Steps / Speed -->
+    <div class="ws-meta-row">
+      <div class="ws-meta">
+        <span class="ws-meta-label"><i class="fas fa-skull"></i> {{localize "GOD.Race.WoundSteps"}}</span>
+        {{#if isEditing}}
+          <input class="ws-meta-input" type="number" name="system.woundSteps" value="{{system.woundSteps}}" min="1">
+        {{else}}
+          <span class="ws-meta-val">{{system.woundSteps}}</span>
+        {{/if}}
+      </div>
+      <div class="ws-meta">
+        <span class="ws-meta-label"><i class="fas fa-person-running"></i> {{localize "GOD.Race.Speed"}}</span>
+        {{#if isEditing}}
+          <input class="ws-meta-input" type="number" name="system.speed" value="{{system.speed}}" min="0">
+        {{else}}
+          <span class="ws-meta-val">{{system.speed}} {{localize "GOD.Race.SpeedUnit"}}</span>
+        {{/if}}
+      </div>
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,21 @@
+{
+  "_key": "!folders!EneXhk11RMEnHyfO",
+  "_id": "EneXhk11RMEnHyfO",
+  "name": "Containers",
+  "type": "Item",
+  "description": "",
+  "sorting": "a",
+  "folder": null,
+  "color": null,
+  "flags": {},
+  "_stats": {
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "coreVersion": "13",
+    "createdTime": 1784110184260,
+    "modifiedTime": 1784110184260,
+    "lastModifiedBy": null,
+    "compendiumSource": null,
+    "duplicateSource": null
+  }
+}

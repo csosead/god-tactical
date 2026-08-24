@@ -1,0 +1,21 @@
+{
+  "_key": "!folders!7Juun4jFGaMomNxO",
+  "_id": "7Juun4jFGaMomNxO",
+  "name": "Броня",
+  "type": "Item",
+  "description": "",
+  "sorting": "a",
+  "folder": null,
+  "color": null,
+  "flags": {},
+  "_stats": {
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "coreVersion": "13",
+    "createdTime": 1784110820010,
+    "modifiedTime": 1784110820010,
+    "lastModifiedBy": null,
+    "compendiumSource": null,
+    "duplicateSource": null
+  }
+}

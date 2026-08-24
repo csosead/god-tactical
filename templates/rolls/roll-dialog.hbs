@@ -1,0 +1,31 @@
+<div class="god-roll-dialog">
+  <div class="roll-field">
+    <div class="roll-label">{{ localize "GOD.Roll.Type" }}</div>
+    <div class="roll-type-btns">
+      <button type="button" class="roll-type-btn {{#if (eq rollType 'disadvantage')}}active-disadv{{/if}}" data-type="disadvantage">{{ localize "GOD.Roll.Disadvantage" }}</button>
+      <button type="button" class="roll-type-btn {{#if (eq rollType 'normal')}}active{{/if}}" data-type="normal">{{ localize "GOD.Roll.Normal" }}</button>
+      <button type="button" class="roll-type-btn {{#if (eq rollType 'advantage')}}active-adv{{/if}}" data-type="advantage">{{ localize "GOD.Roll.Advantage" }}</button>
+    </div>
+  </div>
+
+  <div class="roll-field">
+    <div class="roll-label">{{ localize "GOD.Roll.DiceCount" }}</div>
+    <div class="dice-count-btns">
+      <button type="button" class="dice-btn {{#if (eq diceCount 1)}}active{{/if}}" data-count="1" {{#if (ne rollType 'normal')}}disabled{{/if}}>1d100</button>
+      <button type="button" class="dice-btn {{#if (eq diceCount 2)}}active{{/if}}" data-count="2" {{#if (eq rollType 'normal')}}disabled{{/if}}>2d100</button>
+      <button type="button" class="dice-btn {{#if (eq diceCount 3)}}active{{/if}}" data-count="3" {{#if (eq rollType 'normal')}}disabled{{/if}}>3d100</button>
+    </div>
+  </div>
+
+  <div class="roll-info">
+    <div class="roll-range">
+      <span class="ri-label">{{ localize "GOD.Roll.Range" }}:</span>
+      <span class="ri-range">{{rangeText}}</span>
+    </div>
+    {{#if autoDisadvantage}}
+    <div class="roll-auto-disadv">{{ localize "GOD.Roll.AutoDisadvantage" }}</div>
+    {{/if}}
+  </div>
+
+  <button type="button" class="roll-launch">{{ localize "GOD.Roll.Launch" }}</button>
+</div>

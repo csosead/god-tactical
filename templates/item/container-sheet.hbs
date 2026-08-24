@@ -1,0 +1,112 @@
+<div class="equip-sheet container-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+        <div class="ws-rarity">
+          <div class="rarity-value" data-tooltip="{{rarityTierName}}" data-tooltip-direction="UP">
+            {{#if isEditing}}
+              <input type="number" class="rarity-number-input" name="system.rarity" value="{{rarityValue}}" min="0" max="{{rarityMax}}" step="1">
+            {{else}}
+              <span class="rarity-number">{{rarityValue}}</span>
+            {{/if}}
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-backpack"></i>
+          {{#if isEditing}}
+            <select name="system.containerType">{{selectOptions containerTypes selected=system.containerType valueAttr="value" labelAttr="label"}}</select>
+          {{else}}<span>{{containerTypeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label"}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="ws-tabs">
+    <a class="ws-tab {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      <i class="fas fa-scroll"></i> Описание
+    </a>
+    <a class="ws-tab {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+      <i class="fas fa-cogs"></i> Свойства
+    </a>
+  </nav>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Description -->
+    <div class="ws-pane {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      {{#if isEditing}}
+        <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+      {{else}}
+        <div class="ws-prose">
+          {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    <!-- Properties -->
+    <div class="ws-pane {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+
+      <!-- Capacity -->
+      <div class="ws-meta-row">
+        <div class="ws-meta">
+          <span class="ws-meta-label"><i class="fas fa-boxes-stacked"></i> Грузоподъёмность</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.capacity" value="{{system.capacity}}" min="0">
+          {{else}}
+            <span class="ws-meta-val">{{system.capacity}}</span>
+          {{/if}}
+        </div>
+      </div>
+
+      <!-- Tag color -->
+      <div class="ws-meta-row">
+        <div class="ws-meta">
+          <span class="ws-meta-label"><i class="fas fa-palette"></i> Цвет метки</span>
+          {{#if isEditing}}
+            <input class="ws-color-input" type="color" name="system.color" value="{{system.color}}">
+          {{else}}
+            <span class="ws-meta-val ws-color-swatch" style="background-color: {{system.color}};"></span>
+          {{/if}}
+        </div>
+      </div>
+
+      <!-- Restriction — blank means any storable item is accepted; set (e.g. "Стрелы")
+           to only allow items whose name contains this text (see actor-sheet.mjs's
+           #itemAllowedInContainer). -->
+      <div class="ws-meta-row">
+        <div class="ws-meta">
+          <span class="ws-meta-label"><i class="fas fa-filter"></i> Разрешено класть только</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="text" name="system.restriction" value="{{system.restriction}}" placeholder="Например: Стрелы">
+          {{else}}
+            <span class="ws-meta-val">{{#if system.restriction}}{{system.restriction}}{{else}}Без ограничений{{/if}}</span>
+          {{/if}}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>

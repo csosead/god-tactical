@@ -1,0 +1,37 @@
+{
+  "name": "Белая латный доспех",
+  "type": "armor",
+  "img": "systems/god-tactical/packs/icons/armor/Белые латы.png",
+  "system": {
+    "archetype": "heavy",
+    "drawbackName": "Тяжёлые",
+    "drawbackText": "<p>Глубокая вода, зыбучий песок или шаткий пол. Либо тонешь, либо проваливаешься, либо вязнешь и становится невозможно передвигаться.</p>",
+    "vulnerability1": "crushing",
+    "vulnerability2": "electric",
+    "rarity": "rare",
+    "description": "<p>Полный комплект сплошных металлических пластин, отполированных до зеркального блеска, закрывающих всё тело. Вершина доспешного искусства: монолитные пластины не режутся и не прокалываются. Зеркальная полировка отбрасывает солнечный жар, и латник не запекается в металле — поэтому зной и долгие переходы не изматывают.</p>",
+    "equipped": false,
+    "armorCells": 6
+  },
+  "_id": "X80A5pL504e7nVoe",
+  "effects": [],
+  "folder": "NhpMvW422bDEi18o",
+  "sort": 500000,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358248288,
+    "modifiedTime": 1784099719351,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!X80A5pL504e7nVoe"
+}

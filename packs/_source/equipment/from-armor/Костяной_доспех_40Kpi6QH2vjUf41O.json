@@ -1,0 +1,37 @@
+{
+  "name": "Костяной доспех",
+  "type": "armor",
+  "img": "systems/god-tactical/packs/icons/armor/Костяной доспех.png",
+  "system": {
+    "archetype": "heavy",
+    "drawbackName": "Громоздкий",
+    "drawbackText": "<p>Когда: узкие лазы, норы, вентиляции, захламлённые тесные пространства. Что: не пролезть там, где пройдёт другой; в тесноте задеваешь и сшибаешь предметы, шумишь, опрокидываешь хрупкое.</p>",
+    "vulnerability1": "crushing",
+    "vulnerability2": "freezing",
+    "rarity": "widespread",
+    "description": "<p>Доспех из подогнанных костяных пластин — рёбер, лопаток, черепных сегментов зверя или врага, скреплённых жилами на плотной основе. Жёсткий и пугающий: кость хорошо отводит рез и укол, но сама хрупка — сильный дробящий удар раскалывает пластины, а на морозе кость трескается от холода. Доспех тех, кто живёт охотой и не страшится носить добычу на себе.</p>",
+    "equipped": false,
+    "armorCells": 5
+  },
+  "_id": "40Kpi6QH2vjUf41O",
+  "effects": [],
+  "folder": "yjoRtNigWyk1hMLQ",
+  "sort": 300000,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358248288,
+    "modifiedTime": 1784099706634,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!40Kpi6QH2vjUf41O"
+}

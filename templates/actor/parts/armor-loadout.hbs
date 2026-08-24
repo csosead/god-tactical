@@ -1,0 +1,33 @@
+{{!-- Armor loadout strip — Character sheet only (NPCs don't have armor anymore). Just
+     shows what's currently worn (GOD.ARMOR_SUBTYPES: cuirass/underarmor/helmet/arms/legs)
+     as icon-only pills, rendered as an overlay on the bottom edge of the header portrait
+     (see .portrait/.topbar-portrait in character-sheet.hbs) — icon-only, no text label,
+     told apart purely by tooltip like header-effects.hbs's own strip. Armor no longer
+     carries vulnerabilities — this is purely informational. Clicking a piece toggles a
+     struck-through "broken" visual (system.broken on the item) with no mechanical
+     effect, no roll — EXCEPT the cuirass (piece.cuirass), which is never breakable (no
+     `data-item-id`/click at all, see actor-sheet.mjs's `:not([data-cuirass])` bind
+     selector) and instead passively feeds system.defense (Light → +1 Dodge, Heavy →
+     +2 Fortitude, see CharacterDataModel.prepareDerivedData) — a Heavy cuirass renders
+     silver (state-cuirass-heavy), everything else keeps the default bronze tone.
+     Rendered standalone by #patchArmorLoadout() (actor-sheet.mjs) so equip/toggle
+     actions can patch just this block instead of re-rendering the whole sheet. --}}
+{{#if armorLoadout.hasArmor}}
+<div class="armor-loadout">
+  <div class="armor-loadout-pieces">
+    {{#each armorLoadout.pieces as |piece|}}
+    {{#if piece.cuirass}}
+    <div class="armor-loadout-piece state-cuirass {{#if piece.heavy}}state-cuirass-heavy{{/if}}"
+         data-cuirass="true" data-tooltip="{{piece.tooltip}}" data-tooltip-direction="UP">
+      <i class="fas {{piece.icon}} armor-loadout-piece-icon"></i>
+    </div>
+    {{else}}
+    <div class="armor-loadout-piece {{#if piece.broken}}state-broken{{/if}}"
+         data-item-id="{{piece.id}}" data-tooltip="{{piece.tooltip}}" data-tooltip-direction="UP">
+      <i class="fas {{piece.icon}} armor-loadout-piece-icon"></i>
+    </div>
+    {{/if}}
+    {{/each}}
+  </div>
+</div>
+{{/if}}

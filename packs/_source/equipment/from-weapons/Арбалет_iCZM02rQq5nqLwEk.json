@@ -1,0 +1,49 @@
+{
+  "name": "Арбалет",
+  "type": "weapon",
+  "img": "systems/god-tactical/packs/icons/weapons/Арбалет.png",
+  "system": {
+    "hands": "two",
+    "size": "large",
+    "brosok": [
+      {
+        "rangeModifier": 34,
+        "templateShape": "circle",
+        "templateSize": 2
+      }
+    ],
+    "damageType": "piercing",
+    "property": "<p>После выстрела — Перезарядка.</p>",
+    "rarity": "rare",
+    "description": "",
+    "natisk": [
+      {
+        "rangeModifier": 30,
+        "templateShape": "line",
+        "templateSize": 1
+      }
+    ],
+    "skill": "sensorics"
+  },
+  "_id": "iCZM02rQq5nqLwEk",
+  "effects": [],
+  "folder": "bWH59KYRSvUqHexY",
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358247747,
+    "modifiedTime": 1783771893721,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!iCZM02rQq5nqLwEk"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Кожаный комплект",
+  "type": "Item",
+  "_id": "fyhDA5R1RfHiTjCS",
+  "description": "",
+  "folder": "7Juun4jFGaMomNxO",
+  "sorting": "a",
+  "sort": 0,
+  "color": null,
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783858338044,
+    "modifiedTime": 1783858338044,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!folders!fyhDA5R1RfHiTjCS"
+}

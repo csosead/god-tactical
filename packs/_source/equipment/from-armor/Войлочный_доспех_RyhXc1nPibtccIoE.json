@@ -1,0 +1,37 @@
+{
+  "name": "Войлочный доспех",
+  "type": "armor",
+  "img": "systems/god-tactical/packs/icons/armor/Войлочный доспех.png",
+  "system": {
+    "archetype": "light",
+    "drawbackName": "Впитывание",
+    "drawbackText": "<p>Когда: всегда — войлок намертво тянет грязь, кровь, запахи. Что:  закрывает доступ в чистые кварталы и приличные дома. Снять: промыть и просушить на длительном отдыхе.</p>",
+    "vulnerability1": "cutting",
+    "vulnerability2": "burning",
+    "rarity": "widespread",
+    "description": "<p>Толстый плотный войлок — сваляная шерсть в несколько слоёв, прошитая для жёсткости. Лёгкий, тихий, тёплый; дешёвая защита пехоты и тех, кто живёт в дороге. Удивительно неплохо вязнут в нём дробящий удар и стрела благодаря толщине, но острый клинок режет насухо, а огонь берёт сухую шерсть жадно.</p>",
+    "equipped": false,
+    "armorCells": 3
+  },
+  "_id": "RyhXc1nPibtccIoE",
+  "effects": [],
+  "folder": "OOGaiGkkOk3K3MwV",
+  "sort": -100000,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358248288,
+    "modifiedTime": 1784099630862,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!RyhXc1nPibtccIoE"
+}

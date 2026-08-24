@@ -1,0 +1,23 @@
+{
+  "name": "Кварцевый комплект",
+  "type": "Item",
+  "_id": "Fik3NbQ9dRXyPCB9",
+  "description": "",
+  "folder": "7Juun4jFGaMomNxO",
+  "sorting": "a",
+  "sort": 0,
+  "color": null,
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783858338562,
+    "modifiedTime": 1783858338562,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!folders!Fik3NbQ9dRXyPCB9"
+}

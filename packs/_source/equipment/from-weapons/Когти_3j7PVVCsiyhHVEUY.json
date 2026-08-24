@@ -1,0 +1,37 @@
+{
+  "name": "Когти",
+  "type": "weapon",
+  "img": "icons/svg/aura.svg",
+  "system": {
+    "hands": "main",
+    "size": "medium",
+    "natisk": [],
+    "brosok": [],
+    "damageType": "",
+    "property": "",
+    "rarity": "widespread",
+    "skill": "",
+    "description": ""
+  },
+  "_id": "3j7PVVCsiyhHVEUY",
+  "effects": [],
+  "folder": "bWH59KYRSvUqHexY",
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783431619972,
+    "modifiedTime": 1783431619972,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!3j7PVVCsiyhHVEUY"
+}

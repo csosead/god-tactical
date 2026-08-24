@@ -1,0 +1,8 @@
+2026/08/23-17:41:42.435 ac48 Recovering log #264
+2026/08/23-17:41:42.439 ac48 Delete type=0 #264
+2026/08/23-17:41:42.439 ac48 Delete type=3 #263
+2026/08/23-18:21:41.779 6ad4 Level-0 table #268: started
+2026/08/23-18:21:41.779 6ad4 Level-0 table #268: 0 bytes OK
+2026/08/23-18:21:41.781 6ad4 Delete type=0 #266
+2026/08/23-18:21:41.786 6ad4 Manual compaction at level-0 from '!folders!C8am8cmLpWvYC1ge' @ 72057594037927935 : 1 .. '!journal.pages!zn9DHjwOxNo3Hkgu.63iq94Pxnsd3bgho' @ 0 : 0; will stop at (end)
+2026/08/23-18:21:41.786 6ad4 Manual compaction at level-1 from '!folders!C8am8cmLpWvYC1ge' @ 72057594037927935 : 1 .. '!journal.pages!zn9DHjwOxNo3Hkgu.63iq94Pxnsd3bgho' @ 0 : 0; will stop at (end)

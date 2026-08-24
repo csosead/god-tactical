@@ -1,0 +1,273 @@
+<div class="equip-sheet weapon-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+        {{#unless isSpell}}
+        <div class="ws-rarity">
+          <div class="rarity-value" data-tooltip="{{rarityTierName}}" data-tooltip-direction="UP">
+            {{#if isEditing}}
+              <input type="number" class="rarity-number-input" name="system.rarity" value="{{rarityValue}}" min="0" max="{{rarityMax}}" step="1">
+            {{else}}
+              <span class="rarity-number">{{rarityValue}}</span>
+            {{/if}}
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+        </div>
+        {{/unless}}
+        {{#if canAttack}}
+        <button type="button" class="ws-range-add ws-attack-btn" title="{{localize 'GOD.Weapon.Attack'}}">
+          <i class="fa-solid fa-burst"></i> {{localize "GOD.Weapon.Attack"}}
+        </button>
+        {{/if}}
+      </div>
+
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-hand-paper"></i>
+          {{#if isEditing}}
+            <select name="system.hands">{{selectOptions handOptions selected=system.hands valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{handsLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label"}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-khanda"></i>
+          {{#if isEditing}}
+            <select name="system.damageType">{{selectOptions damageTypes selected=system.damageType valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{#if damageTypeLabel}}{{damageTypeLabel}}{{else}}{{localize "GOD.DamageType.None"}}{{/if}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-brain"></i>
+          {{#if isEditing}}
+            <select name="system.skill">{{selectOptions skillOptions selected=system.skill valueAttr="value" labelAttr="label" localize=false}}</select>
+          {{else}}<span>{{#if skillLabel}}{{skillLabel}}{{else}}—{{/if}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.DamageNature.Hint'}}">
+          <i class="fas fa-hand-sparkles"></i>
+          {{#if isEditing}}
+            <select name="system.damageNature">{{selectOptions damageNatures selected=system.damageNature valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{damageNatureAbbr}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Weapon.AttackTypeHint'}}">
+          <i class="fas fa-crosshairs"></i>
+          {{#if isEditing}}
+            <select name="system.attackType">{{selectOptions attackTypes selected=system.attackType valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{attackTypeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Item.Domain'}}">
+          <i class="fas fa-compass"></i>
+          {{#if isEditing}}
+            <select name="system.domain">{{selectOptions domainOptions selected=system.domain valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{domainLabel}}</span>{{/if}}
+        </span>
+        {{#if (eq system.attackType "ranged")}}
+          {{#if isEditing}}
+          <label class="ws-tag ws-checkbox-label" data-tooltip="{{localize 'GOD.Weapon.CanHitLowFlightHint'}}">
+            <input type="checkbox" name="system.canHitLowFlight" {{#if system.canHitLowFlight}}checked{{/if}}>
+            {{localize "GOD.Weapon.CanHitLowFlight"}}
+          </label>
+          <label class="ws-tag ws-checkbox-label" data-tooltip="{{localize 'GOD.Weapon.CanHitHighFlightHint'}}">
+            <input type="checkbox" name="system.canHitHighFlight" {{#if system.canHitHighFlight}}checked{{/if}}>
+            {{localize "GOD.Weapon.CanHitHighFlight"}}
+          </label>
+          {{else}}
+          <span class="ws-tag" data-tooltip="{{localize 'GOD.Weapon.CanHitLowFlightHint'}}"><i class="fas fa-dove"></i> <span>{{flightBandsLabel}}</span></span>
+          {{/if}}
+        {{/if}}
+        {{#if isSpell}}
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Item.StatusEffectHint'}}">
+          <i class="fas fa-disease"></i>
+          {{#if isEditing}}
+            <select name="system.statusEffect">{{selectOptions statusEffectOptions selected=system.statusEffect valueAttr="value" labelAttr="label" localize=false}}</select>
+          {{else}}<span>{{statusEffectLabel}}</span>{{/if}}
+        </span>
+        {{/if}}
+      </div>
+
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="ws-tabs">
+    <a class="ws-tab {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      <i class="fas fa-scroll"></i> {{localize "GOD.Weapon.TabDescription"}}
+    </a>
+    <a class="ws-tab {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+      <i class="fas fa-cogs"></i> {{localize "GOD.Weapon.TabProperties"}}
+    </a>
+  </nav>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Description -->
+    <div class="ws-pane {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      {{#if isEditing}}
+        <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+      {{else}}
+        <div class="ws-prose">
+          {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    <!-- Properties -->
+    <div class="ws-pane {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+
+      <!-- Настильный — a LIST of independent entries, each with its own bonus + full shape set -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.VerbNatisk"}}</div>
+        <div class="ws-range-list">
+          {{#each natiskEntries as |entry|}}
+          <div class="ws-meta-row">
+            <div class="ws-meta">
+              {{#if ../isEditing}}
+                <span class="ws-meta-label">{{entry.label}}</span>
+                <div class="ws-range-edit">
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.natisk.{{entry.index}}.rangeModifier" value="{{entry.rangeModifierM}}" title="{{localize 'GOD.Weapon.Range'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.natisk.{{entry.index}}.templateShape">{{selectOptions ../natiskTemplateShapes selected=entry.templateShape valueAttr="value" labelAttr="label" localize=true}}</select>
+                  {{#if entry.hasTemplateSize}}
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.natisk.{{entry.index}}.templateSize" value="{{entry.templateSizeM}}" min="0.5" title="{{localize 'GOD.Weapon.TemplateSize'}} (м)">
+                  {{/if}}
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.natisk.{{entry.index}}.hitLogic" title="{{localize 'GOD.Weapon.HitLogicHint'}}">{{selectOptions ../hitLogicOptions selected=entry.hitLogic valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <button type="button" class="ws-range-remove" data-mode="natisk" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              {{else}}
+                <span class="ws-meta-label"><i class="fas fa-ruler ws-range-icon-natisk"></i> {{entry.label}}</span>
+                <span class="ws-meta-val">{{entry.rangeModifierLabel}}{{#if entry.hasTemplate}} · {{entry.templateShapeLabel}}{{#if entry.hasTemplateSize}} {{entry.templateSizeLabel}}{{/if}}{{/if}} · {{entry.hitLogicLabel}}</span>
+              {{/if}}
+            </div>
+          </div>
+          {{else}}
+            {{#unless isEditing}}<span class="ws-empty">—</span>{{/unless}}
+          {{/each}}
+        </div>
+        {{#if isEditing}}
+          <button type="button" class="ws-range-add" data-mode="natisk">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Weapon.AddRange"}}
+          </button>
+        {{/if}}
+      </div>
+
+      <!-- Навесной — same idea, template limited to circle/square -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.VerbBrosok"}}</div>
+        <div class="ws-range-list">
+          {{#each brosokEntries as |entry|}}
+          <div class="ws-meta-row">
+            <div class="ws-meta">
+              {{#if ../isEditing}}
+                <span class="ws-meta-label">{{entry.label}}</span>
+                <div class="ws-range-edit">
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.brosok.{{entry.index}}.rangeModifier" value="{{entry.rangeModifierM}}" title="{{localize 'GOD.Weapon.Range'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.brosok.{{entry.index}}.templateShape">{{selectOptions ../brosokTemplateShapes selected=entry.templateShape valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.brosok.{{entry.index}}.templateSize" value="{{entry.templateSizeM}}" min="0.5" title="{{localize 'GOD.Weapon.TemplateSize'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.brosok.{{entry.index}}.hitLogic" title="{{localize 'GOD.Weapon.HitLogicHint'}}">{{selectOptions ../hitLogicOptions selected=entry.hitLogic valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <button type="button" class="ws-range-remove" data-mode="brosok" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              {{else}}
+                <span class="ws-meta-label"><i class="fas fa-bezier-curve ws-range-icon-brosok"></i> {{entry.label}}</span>
+                <span class="ws-meta-val">{{entry.rangeModifierLabel}}{{#if entry.hasTemplate}} · {{entry.templateShapeLabel}} {{entry.templateSizeLabel}} · {{entry.hitLogicLabel}}{{/if}}</span>
+              {{/if}}
+            </div>
+          </div>
+          {{else}}
+            {{#unless isEditing}}<span class="ws-empty">—</span>{{/unless}}
+          {{/each}}
+        </div>
+        {{#if isEditing}}
+          <button type="button" class="ws-range-add" data-mode="brosok">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Weapon.AddRange"}}
+          </button>
+        {{/if}}
+      </div>
+
+      <!-- Особенности/Features — repeatable {text, activation-stage} entries (2026-08-17),
+           same field/label shared by Armor/Ability/Consumable/Trophy (items.mjs's
+           featureEntryField). Replaces the old single free-text property + whole-card
+           Активация checkbox group — each entry picks its OWN stage now. -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.Property"}}</div>
+        {{#if isEditing}}
+          <div class="ws-feature-list">
+            {{#each features as |entry|}}
+            <div class="ws-feature-row">
+              <textarea class="ws-textarea" name="system.features.{{entry.index}}.text">{{entry.text}}</textarea>
+              <div class="ws-feature-row-foot">
+                <select class="ws-meta-sel" name="system.features.{{entry.index}}.activation">
+                  {{selectOptions ../activationOptions selected=entry.activation valueAttr="value" labelAttr="label" localize=true}}
+                </select>
+                <button type="button" class="ws-feature-remove" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          <button type="button" class="ws-feature-add">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Item.AddFeature"}}
+          </button>
+        {{else}}
+          <div class="ws-feature-list-view">
+            {{#each features as |entry|}}
+            <div class="ws-feature-view-row">
+              {{#if entry.activationLabel}}<span class="ws-tag ws-feature-activation-tag">{{entry.activationLabel}}</span>{{/if}}
+              <div class="ws-prose">{{{entry.text}}}</div>
+            </div>
+            {{else}}
+            <span class="ws-empty">—</span>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+
+      <!-- Granted Items (способности и т.д.) — reference-only, see items.mjs's grantedItemsField.
+           Weapon only — Spell shares this same card/sheet but doesn't get this block. -->
+      {{#unless isSpell}}
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Item.GrantedItems"}}</div>
+        <div class="cls-grant-list">
+          {{#each grantedItems as |entry|}}
+            <div class="cls-grant-row" data-idx="{{entry.idx}}" draggable="{{#if ../isEditing}}true{{else}}false{{/if}}">
+              <img class="cls-grant-img" src="{{entry.img}}" alt="">
+              <span class="cls-grant-name" data-uuid="{{entry.uuid}}" title="{{localize 'GOD.Item.OpenGrantedItem'}}">{{entry.name}}</span>
+              <span class="cls-grant-type">{{entry.typeLabel}}</span>
+              {{#if ../isEditing}}
+                <button type="button" class="cls-grant-remove" data-idx="{{entry.idx}}" title="{{localize 'GOD.Item.RemoveGrantedItem'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              {{/if}}
+            </div>
+          {{else}}
+            <span class="ws-empty">—</span>
+          {{/each}}
+        </div>
+        {{#if isEditing}}
+          <div class="cls-grant-dropzone">
+            <i class="fas fa-arrow-down"></i> {{localize "GOD.Item.DropGrantedItem"}}
+          </div>
+        {{/if}}
+      </div>
+      {{/unless}}
+
+    </div>
+  </section>
+
+</div>

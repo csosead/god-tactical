@@ -1,0 +1,36 @@
+{{!-- Bonus GRIT-cell block (Фокус, renamed to "GRIT") — a flat total, no armor involved:
+     a Character's own base pool (GOD.BASE_GRIT/system.baseGrit), or an NPC's GM-set
+     NPCDataModel.gritMax. Shared by the Character and NPC sheets, and rendered standalone
+     by #patchGritTrack() (actor-sheet.mjs/npc-sheet.mjs) so click/crack/repair/max-±
+     actions can patch just this block instead of re-rendering the whole sheet.
+
+     Guard is "has at least one box OR we're in edit mode" (not hasGrit alone) — an NPC
+     with gritMax still at 0 has zero boxes to show, but edit mode still needs the block
+     to exist so its own "+"/"-" (below) are reachable to raise it off 0 in the first
+     place; outside edit mode with zero boxes there's nothing to click at all, so it's
+     hidden. "-" clamps at 0 (actor-sheet.mjs's/npc-sheet.mjs's #onGritMaxSubtractClick),
+     never rendered disabled at the floor — just a no-op past it, same as "+" has no
+     rendered ceiling either. --}}
+{{#if (or gritTrack.hasGrit editMode)}}
+<div class="grit-track">
+  <div class="wound-track-head">
+    <span class="wound-track-label"><i class="grit-icon"></i> GRIT</span>
+  </div>
+  <div class="wound-marks">
+    {{#each gritTrack.boxes as |box|}}
+    <div class="grit-mark state-{{box.state}}" data-index="{{box.index}}" data-tooltip="{{box.title}}" data-tooltip-direction="UP">
+      <i class="grit-icon"></i>
+      {{#if (eq box.state "cracked")}}<i class="fas fa-bolt grit-crack-badge"></i>{{/if}}
+    </div>
+    {{/each}}
+    {{#if editMode}}
+    <button type="button" class="grit-max-sub" title="Уменьшить максимум GRIT на 1">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <button type="button" class="grit-max-add" title="Увеличить максимум GRIT на 1">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    {{/if}}
+  </div>
+</div>
+{{/if}}

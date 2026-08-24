@@ -1,0 +1,273 @@
+/**
+ * GOD Tactical — Template Geometry (adapted from client/shared/geometry.js)
+ * Grid-cell geometry for AOE shapes. Works with Foundry V13 grid coordinates.
+ */
+
+// ── Foundry grid helpers ─────────────────────────────────────────
+
+/** Convert world coordinates to grid cell indices. */
+export function worldToGrid(wx, wy) {
+  const g = canvas.grid;
+  const offset = g.getOffset({ x: wx, y: wy });
+  // Foundry v13: square grid uses {i, j} or {q, r} depending on grid type.
+  // For square/gridless we normalise to {col, row}.
+  const col = offset.i ?? offset.q ?? 0;
+  const row = offset.j ?? offset.r ?? 0;
+  return { col, row };
+}
+
+/** Grid cell centre in world pixels. */
+export function gridToWorld(col, row) {
+  const g = canvas.grid;
+  const topLeft = g.getTopLeftPoint({ i: col, j: row });
+  return {
+    x: topLeft.x + g.sizeX / 2,
+    y: topLeft.y + g.sizeY / 2,
+  };
+}
+
+/** Top-left corner of a grid cell in world pixels. */
+export function gridToWorldTopLeft(col, row) {
+  return canvas.grid.getTopLeftPoint({ i: col, j: row });
+}
+
+// ── Pure geometry (copied from client/shared/geometry.js) ────────
+
+/** True Supercover DDA line. */
+export function lineCells(c1, r1, c2, r2) {
+  const cells = [], seen = new Set();
+  const add = (c, r) => {
+    const k = c + ',' + r;
+    if (!seen.has(k)) { seen.add(k); cells.push({ col: c, row: r }); }
+  };
+
+  let x = c1, y = r1;
+  const dx = Math.abs(c2 - c1), dy = Math.abs(r2 - r1);
+  const sx = c2 >= c1 ? 1 : -1, sy = r2 >= r1 ? 1 : -1;
+  let err = dx - dy;
+  const inset = 0.05;
+
+  add(x, y);
+  while (x !== c2 || y !== r2) {
+    const e2 = 2 * err;
+    const moveX = e2 > -dy;
+    const moveY = e2 < dx;
+    if (moveX && moveY) { add(x + sx, y); add(x, y + sy); }
+    if (moveX) { err -= dy; x += sx; }
+    if (moveY) { err += dx; y += sy; }
+    add(x, y);
+  }
+
+  const ax = c1 + 0.5, ay = r1 + 0.5;
+  const bx = c2 + 0.5, by = r2 + 0.5;
+  const segDx = bx - ax, segDy = by - ay;
+  const segLen = Math.hypot(segDx, segDy);
+
+  if (segLen > 0.01 && cells.length > 1) {
+    const ux = segDx / segLen, uy = segDy / segLen;
+    const validCells = [];
+
+    for (const { col, row } of cells) {
+      const coreX1 = col + inset, coreX2 = col + 1 - inset;
+      const coreY1 = row + inset, coreY2 = row + 1 - inset;
+      let t0 = 0, t1 = 1;
+      const p = [-segDx, segDx, -segDy, segDy];
+      const q = [ax - coreX1, coreX2 - ax, ay - coreY1, coreY2 - ay];
+      let inside = true;
+      for (let i = 0; i < 4; i++) {
+        if (p[i] === 0) {
+          if (q[i] < 0) { inside = false; break; }
+        } else {
+          const t = q[i] / p[i];
+          if (p[i] < 0) { if (t > t1) { inside = false; break; } if (t > t0) t0 = t; }
+          else          { if (t < t0) { inside = false; break; } if (t < t1) t1 = t; }
+        }
+      }
+      if (inside && t0 <= t1) validCells.push({ col, row });
+    }
+
+    const steps = new Map();
+    for (const { col, row } of validCells) {
+      const cx = col + 0.5, cy = row + 0.5;
+      const vx = cx - ax, vy = cy - ay;
+      const proj = (vx * segDx + vy * segDy) / (segLen * segLen);
+      const step = Math.round(proj * Math.max(dx, dy));
+      const perpDist = Math.abs(vx * (-uy) + vy * ux);
+      if (!steps.has(step) || perpDist < steps.get(step).dist) {
+        steps.set(step, { col, row, dist: perpDist });
+      }
+    }
+
+    const result = Array.from(steps.values()).map(({ col, row }) => ({ col, row }));
+    const hasStart = result.some(c => c.col === c1 && c.row === r1);
+    const hasEnd   = result.some(c => c.col === c2 && c.row === r2);
+    if (!hasStart) result.unshift({ col: c1, row: r1 });
+    if (!hasEnd)   result.push({ col: c2, row: r2 });
+
+    result.sort((a, b) => {
+      const da = (a.col + 0.5 - ax) * ux + (a.row + 0.5 - ay) * uy;
+      const db = (b.col + 0.5 - ax) * ux + (b.row + 0.5 - ay) * uy;
+      return da - db;
+    });
+    return result;
+  }
+  return cells;
+}
+
+/** Wide line — Center-Point Rule, forward-only corridor (3 cells wide). */
+export function wideLineCells(c1, r1, c2, r2) {
+  const ax = c1 + 0.5, ay = r1 + 0.5;
+  const bx = c2 + 0.5, by = r2 + 0.5;
+  const dx = bx - ax, dy = by - ay;
+  const len = Math.hypot(dx, dy);
+  if (len < 0.01) return [{ col: c1, row: r1 }];
+
+  const ux = dx / len, uy = dy / len;
+  const halfW = 1.5;
+  const cells = [];
+  const margin = Math.ceil(halfW) + 1;
+  const colMin = Math.min(c1, c2) - margin, colMax = Math.max(c1, c2) + margin;
+  const rowMin = Math.min(r1, r2) - margin, rowMax = Math.max(r1, r2) + margin;
+
+  for (let col = colMin; col <= colMax; col++) {
+    for (let row = rowMin; row <= rowMax; row++) {
+      const cx = col + 0.5, cy = row + 0.5;
+      const vx = cx - ax, vy = cy - ay;
+      const fwd = vx * ux + vy * uy;
+      if (fwd < 0 || fwd > len) continue;
+      const perp = Math.abs(vx * (-uy) + vy * ux);
+      if (perp <= halfW) cells.push({ col, row });
+    }
+  }
+
+  cells.sort((a, b) => {
+    const da = (a.col + 0.5 - ax) * ux + (a.row + 0.5 - ay) * uy;
+    const db = (b.col + 0.5 - ax) * ux + (b.row + 0.5 - ay) * uy;
+    return da - db;
+  });
+  return cells;
+}
+
+/** Circle by radius in cells. */
+export function circleCells(cc, rc, radiusCells) {
+  const cells = [];
+  const r  = Math.max(0, radiusCells);
+  const ri = Math.ceil(r);
+  const cx = cc + 0.5, cy = rc + 0.5;
+  for (let dc = -ri; dc <= ri; dc++) {
+    for (let dr = -ri; dr <= ri; dr++) {
+      const col = cc + dc, row = rc + dr;
+      if (Math.hypot(col + 0.5 - cx, row + 0.5 - cy) <= r) cells.push({ col, row });
+    }
+  }
+  return cells;
+}
+
+/** Square centered on (cc,rc) with half-side in cells. */
+export function squareCells(cc, rc, halfSize) {
+  const cells = [];
+  const h  = Math.max(0, Math.round(halfSize));
+  const cx = cc + 0.5, cy = rc + 0.5;
+  const xMin = cx - h - 0.5, xMax = cx + h + 0.5;
+  const yMin = cy - h - 0.5, yMax = cy + h + 0.5;
+  for (let dc = -h - 1; dc <= h + 1; dc++) {
+    for (let dr = -h - 1; dr <= h + 1; dr++) {
+      const col = cc + dc, row = rc + dr;
+      const mx = col + 0.5, my = row + 0.5;
+      if (mx >= xMin && mx <= xMax && my >= yMin && my <= yMax) cells.push({ col, row });
+    }
+  }
+  return cells;
+}
+
+/** 60° cone. */
+export function coneCells(sc, sr, ec, er) {
+  const ax = sc + 0.5, ay = sr + 0.5;
+  const tx = ec + 0.5, ty = er + 0.5;
+  const aimX = tx - ax, aimY = ty - ay;
+  const radius = Math.hypot(aimX, aimY);
+  if (radius < 0.5) return [{ col: sc, row: sr }];
+
+  const cosHalf = Math.cos(Math.PI / 6);
+  const maxR = Math.ceil(radius) + 1;
+  const cells = [];
+  const ux = aimX / radius, uy = aimY / radius;
+
+  for (let dc = -maxR; dc <= maxR; dc++) {
+    for (let dr = -maxR; dr <= maxR; dr++) {
+      const col = sc + dc, row = sr + dr;
+      const vx = col + 0.5 - ax, vy = row + 0.5 - ay;
+      const dist = Math.hypot(vx, vy);
+      if (dist <= radius) {
+        if (dist < 0.5 || (vx * ux + vy * uy) / dist >= cosHalf) {
+          cells.push({ col, row });
+        }
+      }
+    }
+  }
+  return cells;
+}
+
+/** Single cell. */
+export function pointCell(c, r) {
+  return [{ col: c, row: r }];
+}
+
+/** Dispatcher. */
+export function computeCells(startCell, endCell, shape) {
+  const { col: sc, row: sr } = startCell, { col: ec, row: er } = endCell;
+  switch (shape) {
+    case 'line':     return lineCells(sc, sr, ec, er);
+    case 'wideline': return wideLineCells(sc, sr, ec, er);
+    case 'point':    return pointCell(ec, er);
+    case 'circle':   return circleCells(sc, sr, Math.hypot(ec - sc, er - sr));
+    case 'square':   return squareCells(sc, sr, Math.max(Math.abs(ec - sc), Math.abs(er - sr)));
+    case 'triangle': return coneCells(sc, sr, ec, er);
+    default:         return pointCell(ec, er);
+  }
+}
+
+// ── Foundry-specific helpers ─────────────────────────────────────
+
+/**
+ * Compute cells covered by an existing Foundry MeasuredTemplate document.
+ * Returns { shape, startCell, endCell, cells }.
+ */
+export function getTemplateCells(doc) {
+  const shape = doc.t; // 'circle' | 'cone' | 'ray' | 'rect'
+  const origin = worldToGrid(doc.x, doc.y);
+  
+  if (shape === 'point') {
+    return { shape, startCell: origin, endCell: origin, cells: pointCell(origin.col, origin.row) };
+  }
+  
+  // For other shapes we need an 'end' cell. Derive it from direction + distance.
+  const distCells = doc.distance / canvas.grid.distance;
+  const dir = doc.direction ?? 0; // degrees
+  const rad = Math.toRadians(dir);
+  const ec = Math.round(origin.col + distCells * Math.cos(rad));
+  const er = Math.round(origin.row + distCells * Math.sin(rad));
+  const endCell = { col: ec, row: er };
+  
+  let godShape = shape;
+  if (shape === 'ray') godShape = 'line';
+  if (shape === 'rect') godShape = 'square';
+  
+  const cells = computeCells(origin, endCell, godShape);
+  return { shape: godShape, startCell: origin, endCell, cells };
+}
+
+/** Highlight a set of cells on the grid. */
+export function highlightCells(cells, name = 'god-template', color = 0xff0000, alpha = 0.25) {
+  const grid = canvas.interface.grid;
+  grid.clearHighlightLayer(name);
+  for (const { col, row } of cells) {
+    const tl = gridToWorldTopLeft(col, row);
+    grid.highlightPosition(name, { x: tl.x, y: tl.y, color, alpha, border: null });
+  }
+}
+
+/** Clear highlight. */
+export function clearHighlight(name = 'god-template') {
+  canvas.interface.grid?.clearHighlightLayer(name);
+}

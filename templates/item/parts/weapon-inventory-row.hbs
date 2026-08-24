@@ -1,0 +1,151 @@
+<div class="inv-card"
+     data-item-id="{{this.id}}"
+     data-item-type="{{this.type}}"
+     data-item-rarity="{{this.rarityKey}}"
+     data-container-id="{{this.containerId}}"
+     data-item-subtype="{{this.subtypeKey}}">
+
+  {{!-- Card header --}}
+  <div class="inv-card-head">
+    <img class="inv-card-img" src="{{this.img}}" alt="">
+    {{#if this.isContainer}}
+    <i class="fas {{#if this.expanded}}fa-chevron-down{{else}}fa-chevron-right{{/if}} inv-container-toggle" data-item-id="{{this.id}}" data-tooltip="{{#if this.expanded}}Свернуть{{else}}Развернуть{{/if}}"></i>
+    <i class="fas fa-backpack inv-container-icon" style="color: {{this.color}};" data-tooltip="{{this.containerTypeLabel}}"></i>
+    {{/if}}
+    {{#if this.containerColor}}
+    <i class="fas fa-backpack inv-container-icon inv-in-container-icon" style="color: {{this.containerColor}};" data-tooltip="В контейнере: {{this.containerName}}"></i>
+    {{/if}}
+    <div class="inv-card-title">
+      <span class="inv-card-name">{{this.name}}</span>
+      {{#if this.equipped}}
+      <i class="fas fa-circle-check inv-equipped-badge" data-tooltip="Экипировано"></i>
+      {{/if}}
+    </div>
+    {{#if this.rarityValue}}
+    <div class="rarity-value rarity-value-sm">
+      <span class="rarity-number">{{this.rarityValue}}</span>
+      <i class="fas fa-gem rarity-gem"></i>
+    </div>
+    {{/if}}
+  </div>
+
+  {{!-- Weapon stats --}}
+  {{#if this.isWeapon}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-hand-paper"></i> {{this.handsLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-khanda"></i> {{this.damageTypeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-hand-sparkles"></i> {{this.damageNatureAbbr}}</span>
+    {{#if this.skillLabel}}
+    <span class="inv-meta-chip"><i class="fas fa-brain"></i> {{this.skillLabel}}</span>
+    {{/if}}
+    {{#each this.natiskEntries as |mode|}}
+    <span class="inv-meta-chip inv-meta-chip-natisk"><i class="fas fa-ruler"></i> {{mode.label}}: {{mode.rangeModifierValue}}{{#if mode.hasTemplate}}, {{mode.templateShapeLabel}}{{#if mode.hasTemplateSize}}: {{mode.templateSizeValue}}{{/if}}{{/if}}</span>
+    {{/each}}
+    {{#each this.brosokEntries as |mode|}}
+    <span class="inv-meta-chip inv-meta-chip-brosok"><i class="fas fa-bezier-curve"></i> {{mode.label}}: {{mode.rangeModifierValue}}{{#if mode.hasTemplate}}, {{mode.templateShapeLabel}}{{#if mode.hasTemplateSize}}: {{mode.templateSizeValue}}{{/if}}{{/if}}</span>
+    {{/each}}
+    {{#if this.activationTypesLabel}}
+    <span class="inv-meta-chip"><i class="fas fa-hourglass-half"></i> {{this.activationTypesLabel}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- Armor stats --}}
+  {{#if this.isArmor}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-vest"></i> {{this.subtypeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-shield-alt"></i> {{this.archetypeLabel}}</span>
+    {{#if this.activationTypesLabel}}
+    <span class="inv-meta-chip"><i class="fas fa-hourglass-half"></i> {{this.activationTypesLabel}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- Ability stats --}}
+  {{#if this.isAbility}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-layer-group"></i> {{this.subtypeLabel}}</span>
+    {{#if this.activationTypesLabel}}
+    <span class="inv-meta-chip"><i class="fas fa-hourglass-half"></i> {{this.activationTypesLabel}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- Consumable / Trophy stats --}}
+  {{#if this.isConsumable}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip" data-tooltip="Запас — цепочка кубиков растёт при провале/фиаско, см. «Проверить»"><i class="fas fa-dice-d10"></i> {{this.stockDice}}/{{this.stockMax}}</span>
+    {{#if this.activationTypesLabel}}
+    <span class="inv-meta-chip"><i class="fas fa-hourglass-half"></i> {{this.activationTypesLabel}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+  {{#if this.isTrophy}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-layer-group"></i> {{this.categoryLabel}}</span>
+  </div>
+  {{/if}}
+
+  {{!-- Tools stats --}}
+  {{#if this.isTools}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    {{#if this.competency}}
+    <span class="inv-meta-chip"><i class="fas fa-toolbox"></i> {{this.competency}}</span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{!-- Container stats --}}
+  {{#if this.isContainer}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-backpack"></i> {{this.containerTypeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip inv-container-capacity-chip"><i class="fas fa-boxes-stacked"></i> Грузоподъёмность: {{this.occupied}}/{{this.capacity}}</span>
+    {{#if this.restriction}}
+    <span class="inv-meta-chip" data-tooltip="Разрешено класть только предметы с этим в названии"><i class="fas fa-filter"></i> Только: {{this.restriction}}</span>
+    {{/if}}
+  </div>
+
+  {{!-- Contents — a container is a folder: what's packed in it (system.containerId)
+       always renders here, nested (see actor-sheet.mjs's #onToggleContainerExpand) —
+       the "collapsed" class is what actually hides it (same as a closed folder showing
+       nothing of what's inside), not template omission. Always-in-DOM is deliberate:
+       module/sheets/item-search.mjs's inventory search needs to see into a COLLAPSED
+       container to find a match packed inside it, and momentarily reveal just that
+       nested list (see its "search-open" class) without touching this expand/collapse
+       state itself. --}}
+  <div class="inv-list inv-nested-list{{#unless this.expanded}} collapsed{{/unless}}">
+    {{#each this.contents}}
+    {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+    {{else}}
+    <div class="inv-nested-empty">Пусто — перетащите сюда предмет из инвентаря</div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{!-- Class stats --}}
+  {{#if this.isClass}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-khanda"></i> Damage {{this.damageSummary}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-wind"></i> Dodge {{this.dodgeSummary}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-shield-heart"></i> Fortitude {{this.fortitudeSummary}}</span>
+  </div>
+  {{/if}}
+
+  {{!-- Race stats --}}
+  {{#if this.isRace}}
+  <div class="inv-card-meta">
+    <span class="inv-meta-chip"><i class="fas fa-box"></i> {{this.sizeLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-weight-hanging"></i> {{this.weightLabel}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-skull"></i> Жизней: {{this.woundSteps}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-person-running"></i> {{this.speed}} {{localize "GOD.Race.SpeedUnit"}}</span>
+    <span class="inv-meta-chip"><i class="fas fa-boxes-stacked"></i> Грузоподъёмность: {{this.capacity}}</span>
+  </div>
+  {{/if}}
+
+</div>

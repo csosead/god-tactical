@@ -1,0 +1,21 @@
+{
+  "_key": "!folders!b4K8TbeABkmor2nB",
+  "_id": "b4K8TbeABkmor2nB",
+  "name": "Расходники",
+  "type": "Item",
+  "description": "",
+  "sorting": "a",
+  "folder": null,
+  "color": null,
+  "flags": {},
+  "_stats": {
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "coreVersion": "13",
+    "createdTime": 1784110820010,
+    "modifiedTime": 1784110820010,
+    "lastModifiedBy": null,
+    "compendiumSource": null,
+    "duplicateSource": null
+  }
+}

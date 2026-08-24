@@ -1,0 +1,182 @@
+{
+  "id": "god-tactical",
+  "title": "GOD Tactical",
+  "description": "Tactical RPG system for Foundry VTT based on GOD engine",
+  "version": "0.1.2",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "GOD Team"
+    }
+  ],
+  "esmodules": [
+    "god-tactical.mjs"
+  ],
+  "styles": [
+    "styles/god-tactical.css",
+    "styles/grid-overlay.css"
+  ],
+  "languages": [
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "lang/ru.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "character": {
+        "label": "GOD.Actor.Character"
+      },
+      "npc": {
+        "label": "GOD.Actor.NPC"
+      },
+      "creature": {
+        "label": "GOD.Actor.Creature"
+      }
+    },
+    "Item": {
+      "weapon": {
+        "label": "GOD.Item.Types.Weapon"
+      },
+      "spell": {
+        "label": "GOD.Item.Types.Spell"
+      },
+      "armor": {
+        "label": "GOD.Item.Types.Armor"
+      },
+      "consumable": {
+        "label": "GOD.Item.Types.Consumable"
+      },
+      "trophies": {
+        "label": "GOD.Item.Types.Treasure"
+      },
+      "class": {
+        "label": "GOD.Item.Types.Class"
+      },
+      "race": {
+        "label": "GOD.Item.Types.Race"
+      },
+      "creature": {
+        "label": "GOD.Item.Types.Creature"
+      },
+      "ability": {
+        "label": "GOD.Item.Types.Ability"
+      },
+      "container": {
+        "label": "GOD.Item.Types.Container"
+      },
+      "tools": {
+        "label": "GOD.Item.Types.Tools"
+      }
+    }
+  },
+  "packs": [
+    {
+      "name": "treasures",
+      "label": "GOD.Pack.Treasures",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "bestiary",
+      "label": "GOD.Pack.Bestiary",
+      "type": "Actor",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "classes",
+      "label": "GOD.Pack.Classes",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "races",
+      "label": "GOD.Pack.Races",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "creatures",
+      "label": "GOD.Pack.Creatures",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "abilities",
+      "label": "GOD.Pack.Abilities",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "equipment",
+      "label": "GOD.Pack.Equipment",
+      "type": "Item",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "journal",
+      "label": "GOD.Pack.Journal",
+      "type": "JournalEntry",
+      "system": "god-tactical",
+      "ownership": {
+        "PLAYER": "LIMITED",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
+  "relationships": {
+    "recommends": [
+      {
+        "id": "lib-wrapper",
+        "type": "module",
+        "reason": "Used to disable native wall-blocking vision (Detection Modes) in favor of pure distance-based visibility."
+      }
+    ]
+  },
+  "socket": false,
+  "initiative": "1d20",
+  "grid": {
+    "distance": 0.5,
+    "units": "m",
+    "diagonals": 4
+  },
+  "primaryTokenAttribute": "nf",
+  "secondaryTokenAttribute": "damage"
+}

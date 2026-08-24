@@ -1,0 +1,291 @@
+<div class="equip-sheet ability-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+        {{#if canAttack}}
+        <button type="button" class="ws-range-add ws-attack-btn" title="{{localize 'GOD.Weapon.Attack'}}">
+          <i class="fa-solid fa-burst"></i> {{localize "GOD.Weapon.Attack"}}
+        </button>
+        {{/if}}
+      </div>
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-layer-group"></i>
+          {{#if isEditing}}
+            <select name="system.subtype">{{selectOptions subtypeOptions selected=system.subtype valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{subtypeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-bolt"></i>
+          {{#if isEditing}}
+            <select name="system.activation">{{selectOptions activationOptions selected=system.activation valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{activationLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-hand-paper"></i>
+          {{#if isEditing}}
+            <select name="system.hands">{{selectOptions handOptions selected=system.hands valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{handsLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-khanda"></i>
+          {{#if isEditing}}
+            <select name="system.damageType">{{selectOptions damageTypes selected=system.damageType valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{#if damageTypeLabel}}{{damageTypeLabel}}{{else}}{{localize "GOD.DamageType.None"}}{{/if}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-brain"></i>
+          {{#if isEditing}}
+            <select name="system.skill">{{selectOptions skillOptions selected=system.skill valueAttr="value" labelAttr="label" localize=false}}</select>
+          {{else}}<span>{{#if skillLabel}}{{skillLabel}}{{else}}—{{/if}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.DamageNature.Hint'}}">
+          <i class="fas fa-hand-sparkles"></i>
+          {{#if isEditing}}
+            <select name="system.damageNature">{{selectOptions damageNatures selected=system.damageNature valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{damageNatureAbbr}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Weapon.AttackTypeHint'}}">
+          <i class="fas fa-crosshairs"></i>
+          {{#if isEditing}}
+            <select name="system.attackType">{{selectOptions attackTypes selected=system.attackType valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{attackTypeLabel}}</span>{{/if}}
+        </span>
+        {{#if (eq system.attackType "ranged")}}
+          {{#if isEditing}}
+          <label class="ws-tag ws-checkbox-label" data-tooltip="{{localize 'GOD.Weapon.CanHitLowFlightHint'}}">
+            <input type="checkbox" name="system.canHitLowFlight" {{#if system.canHitLowFlight}}checked{{/if}}>
+            {{localize "GOD.Weapon.CanHitLowFlight"}}
+          </label>
+          <label class="ws-tag ws-checkbox-label" data-tooltip="{{localize 'GOD.Weapon.CanHitHighFlightHint'}}">
+            <input type="checkbox" name="system.canHitHighFlight" {{#if system.canHitHighFlight}}checked{{/if}}>
+            {{localize "GOD.Weapon.CanHitHighFlight"}}
+          </label>
+          {{else}}
+          <span class="ws-tag" data-tooltip="{{localize 'GOD.Weapon.CanHitLowFlightHint'}}"><i class="fas fa-dove"></i> <span>{{flightBandsLabel}}</span></span>
+          {{/if}}
+        {{/if}}
+        <span class="ws-tag ws-status-tag" data-tooltip="{{statusEffectHint}}">
+          <i class="fas fa-disease"></i>
+          {{#if isEditing}}
+            <span class="cls-comp-list ws-status-list">
+              {{#each statusEffects as |se|}}
+              <span class="cls-comp-chip">
+                {{se.name}}
+                <button type="button" class="ws-status-remove cls-comp-remove" data-idx="{{se.idx}}" title="{{localize 'GOD.Item.RemoveStatusEffect'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </span>
+              {{else}}
+              <span class="ws-empty">—</span>
+              {{/each}}
+              {{#if canAddStatusEffect}}
+              <button type="button" class="ws-status-add-btn" title="{{localize 'GOD.Item.AddStatusEffect'}}">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              {{/if}}
+            </span>
+          {{else}}<span>{{statusEffectLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Item.Domain'}}">
+          <i class="fas fa-compass"></i>
+          {{#if isEditing}}
+            <select name="system.domain">{{selectOptions domainOptions selected=system.domain valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{domainLabel}}</span>{{/if}}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="ws-tabs">
+    <a class="ws-tab {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      <i class="fas fa-scroll"></i> {{localize "GOD.Weapon.TabDescription"}}
+    </a>
+    <a class="ws-tab {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+      <i class="fas fa-cogs"></i> {{localize "GOD.Weapon.TabProperties"}}
+    </a>
+  </nav>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Description — always just the free-text lore, same as Weapon/Spell/Armor -->
+    <div class="ws-pane {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      {{#if isEditing}}
+        <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+      {{else}}
+        <div class="ws-prose">
+          {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    <!-- Properties -->
+    <div class="ws-pane {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+
+      <!-- Recovery (active abilities only) -->
+      {{#if isActive}}
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Ability.Recovery"}}</div>
+        <div class="ws-meta-row">
+          <div class="ws-meta">
+            <span class="ws-meta-label"><i class="fas fa-rotate"></i> {{localize "GOD.Ability.RecoveryMode"}}</span>
+            {{#if isEditing}}
+              <select class="ws-meta-sel" name="system.recoveryMode">{{selectOptions recoveryModeOptions selected=system.recoveryMode valueAttr="value" labelAttr="label" localize=true}}</select>
+            {{else}}
+              <span class="ws-meta-val">{{recoveryModeLabel}}</span>
+            {{/if}}
+          </div>
+
+          {{#if isStabilize}}
+          <div class="ws-meta">
+            <span class="ws-meta-label"><i class="fas fa-hashtag"></i> {{localize "GOD.Ability.RecoveryCount"}}</span>
+            {{#if isEditing}}
+              <input class="ws-meta-input" type="number" name="system.recoveryCount" value="{{system.recoveryCount}}" min="1">
+            {{else}}
+              <span class="ws-meta-val">{{system.recoveryCount}}</span>
+            {{/if}}
+          </div>
+          {{/if}}
+
+          {{#if isPeriod}}
+          <div class="ws-meta">
+            <span class="ws-meta-label"><i class="fas fa-hourglass-half"></i> {{localize "GOD.Ability.RecoveryPeriodLabel"}}</span>
+            {{#if isEditing}}
+              <select class="ws-meta-sel" name="system.recoveryPeriod">{{selectOptions periodOptions selected=system.recoveryPeriod valueAttr="value" labelAttr="label" localize=true}}</select>
+            {{else}}
+              <span class="ws-meta-val">{{periodLabel}}</span>
+            {{/if}}
+          </div>
+          {{/if}}
+        </div>
+        {{#if isEditing}}<p class="ws-hint">{{localize "GOD.Ability.RecoveryHint"}}</p>{{/if}}
+      </div>
+      {{/if}}
+
+      <!-- Настильный — a LIST of independent entries, each with its own bonus + full shape set -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.VerbNatisk"}}</div>
+        <div class="ws-range-list">
+          {{#each natiskEntries as |entry|}}
+          <div class="ws-meta-row">
+            <div class="ws-meta">
+              {{#if ../isEditing}}
+                <span class="ws-meta-label">{{entry.label}}</span>
+                <div class="ws-range-edit">
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.natisk.{{entry.index}}.rangeModifier" value="{{entry.rangeModifierM}}" title="{{localize 'GOD.Weapon.Range'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.natisk.{{entry.index}}.templateShape">{{selectOptions ../natiskTemplateShapes selected=entry.templateShape valueAttr="value" labelAttr="label" localize=true}}</select>
+                  {{#if entry.hasTemplateSize}}
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.natisk.{{entry.index}}.templateSize" value="{{entry.templateSizeM}}" min="0.5" title="{{localize 'GOD.Weapon.TemplateSize'}} (м)">
+                  {{/if}}
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.natisk.{{entry.index}}.hitLogic" title="{{localize 'GOD.Weapon.HitLogicHint'}}">{{selectOptions ../hitLogicOptions selected=entry.hitLogic valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <button type="button" class="ws-range-remove" data-mode="natisk" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              {{else}}
+                <span class="ws-meta-label"><i class="fas fa-ruler ws-range-icon-natisk"></i> {{entry.label}}</span>
+                <span class="ws-meta-val">{{entry.rangeModifierLabel}}{{#if entry.hasTemplate}} · {{entry.templateShapeLabel}}{{#if entry.hasTemplateSize}} {{entry.templateSizeLabel}}{{/if}}{{/if}} · {{entry.hitLogicLabel}}</span>
+              {{/if}}
+            </div>
+          </div>
+          {{else}}
+            {{#unless isEditing}}<span class="ws-empty">—</span>{{/unless}}
+          {{/each}}
+        </div>
+        {{#if isEditing}}
+          <button type="button" class="ws-range-add" data-mode="natisk">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Weapon.AddRange"}}
+          </button>
+        {{/if}}
+      </div>
+
+      <!-- Навесной — same idea, template limited to circle/square -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.VerbBrosok"}}</div>
+        <div class="ws-range-list">
+          {{#each brosokEntries as |entry|}}
+          <div class="ws-meta-row">
+            <div class="ws-meta">
+              {{#if ../isEditing}}
+                <span class="ws-meta-label">{{entry.label}}</span>
+                <div class="ws-range-edit">
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.brosok.{{entry.index}}.rangeModifier" value="{{entry.rangeModifierM}}" title="{{localize 'GOD.Weapon.Range'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.brosok.{{entry.index}}.templateShape">{{selectOptions ../brosokTemplateShapes selected=entry.templateShape valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <input class="ws-meta-input" type="number" step="0.5" name="system.brosok.{{entry.index}}.templateSize" value="{{entry.templateSizeM}}" min="0.5" title="{{localize 'GOD.Weapon.TemplateSize'}} (м)">
+                  <select class="ws-meta-sel ws-meta-sel-narrow" name="system.brosok.{{entry.index}}.hitLogic" title="{{localize 'GOD.Weapon.HitLogicHint'}}">{{selectOptions ../hitLogicOptions selected=entry.hitLogic valueAttr="value" labelAttr="label" localize=true}}</select>
+                  <button type="button" class="ws-range-remove" data-mode="brosok" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              {{else}}
+                <span class="ws-meta-label"><i class="fas fa-bezier-curve ws-range-icon-brosok"></i> {{entry.label}}</span>
+                <span class="ws-meta-val">{{entry.rangeModifierLabel}}{{#if entry.hasTemplate}} · {{entry.templateShapeLabel}} {{entry.templateSizeLabel}} · {{entry.hitLogicLabel}}{{/if}}</span>
+              {{/if}}
+            </div>
+          </div>
+          {{else}}
+            {{#unless isEditing}}<span class="ws-empty">—</span>{{/unless}}
+          {{/each}}
+        </div>
+        {{#if isEditing}}
+          <button type="button" class="ws-range-add" data-mode="brosok">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Weapon.AddRange"}}
+          </button>
+        {{/if}}
+      </div>
+
+      <!-- Особенности/Features — repeatable {text, activation-stage} entries (2026-08-17),
+           same field/label shared by Weapon/Spell/Armor/Consumable/Trophy (items.mjs's
+           featureEntryField). Replaces the old single free-text property + whole-card
+           Активация checkbox group — each entry picks its OWN stage now. Uses
+           featureActivationOptions (NOT activationOptions — that's this card's own
+           separate passive/active select above). -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.Property"}}</div>
+        {{#if isEditing}}
+          <div class="ws-feature-list">
+            {{#each features as |entry|}}
+            <div class="ws-feature-row">
+              <textarea class="ws-textarea" name="system.features.{{entry.index}}.text">{{entry.text}}</textarea>
+              <div class="ws-feature-row-foot">
+                <select class="ws-meta-sel" name="system.features.{{entry.index}}.activation">
+                  {{selectOptions ../featureActivationOptions selected=entry.activation valueAttr="value" labelAttr="label" localize=true}}
+                </select>
+                <button type="button" class="ws-feature-remove" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          <button type="button" class="ws-feature-add">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Item.AddFeature"}}
+          </button>
+        {{else}}
+          <div class="ws-feature-list-view">
+            {{#each features as |entry|}}
+            <div class="ws-feature-view-row">
+              {{#if entry.activationLabel}}<span class="ws-tag ws-feature-activation-tag">{{entry.activationLabel}}</span>{{/if}}
+              <div class="ws-prose">{{{entry.text}}}</div>
+            </div>
+            {{else}}
+            <span class="ws-empty">—</span>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+
+    </div>
+  </section>
+
+</div>

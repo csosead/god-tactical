@@ -1,0 +1,140 @@
+<div class="equip-sheet consumable-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+        <div class="ws-rarity">
+          <div class="rarity-value" data-tooltip="{{rarityTierName}}" data-tooltip-direction="UP">
+            {{#if isEditing}}
+              <input type="number" class="rarity-number-input" name="system.rarity" value="{{rarityValue}}" min="0" max="{{rarityMax}}" step="1">
+            {{else}}
+              <span class="rarity-number">{{rarityValue}}</span>
+            {{/if}}
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label"}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Item.Domain'}}">
+          <i class="fas fa-compass"></i>
+          {{#if isEditing}}
+            <select name="system.domain">{{selectOptions domainOptions selected=system.domain valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{domainLabel}}</span>{{/if}}
+        </span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="ws-tabs">
+    <a class="ws-tab {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      <i class="fas fa-scroll"></i> Описание
+    </a>
+    <a class="ws-tab {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+      <i class="fas fa-cogs"></i> Свойства
+    </a>
+  </nav>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Description -->
+    <div class="ws-pane {{#if (eq activeTab 'description')}}active{{/if}}" data-tab="description">
+      {{#if isEditing}}
+        <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+      {{else}}
+        <div class="ws-prose">
+          {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+    <!-- Properties -->
+    <div class="ws-pane {{#if (eq activeTab 'properties')}}active{{/if}}" data-tab="properties">
+
+      <!-- Запас (Stock) — stockDice is the current stock-dice chain length (grows via
+           "Проверить", or can be nudged down with "-1" when restocked/repaired);
+           stockMax is the GM-set cap on how long that chain can grow. -->
+      <div class="ws-meta-row">
+        <div class="ws-meta">
+          <span class="ws-meta-label"><i class="fas fa-dice-d10"></i> {{localize "GOD.Item.Consumable.StockDice"}}</span>
+          <div class="ws-stock-control">
+            <button type="button" class="ws-stock-decrement" data-tooltip="{{localize 'GOD.Item.Consumable.StockDecrementHint'}}" {{#if (lte system.stockDice 1)}}disabled{{/if}}>
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            {{#if isEditing}}
+              <input class="ws-meta-input ws-stock-input" type="number" name="system.stockDice" value="{{system.stockDice}}" min="1">
+            {{else}}
+              <span class="ws-meta-val">{{system.stockDice}}</span>
+            {{/if}}
+          </div>
+        </div>
+        <div class="ws-meta">
+          <span class="ws-meta-label"><i class="fas fa-battery-full"></i> {{localize "GOD.Item.Consumable.StockMax"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.stockMax" value="{{system.stockMax}}" min="1">
+          {{else}}
+            <span class="ws-meta-val">{{system.stockMax}}</span>
+          {{/if}}
+        </div>
+      </div>
+
+      <!-- Особенности/Features — repeatable {text, activation-stage} entries (2026-08-17),
+           same field/label shared by Weapon/Armor/Ability/Trophy (items.mjs's
+           featureEntryField). Replaces the old single free-text property + whole-card
+           Активация checkbox group — each entry picks its OWN stage now. -->
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Weapon.Property"}}</div>
+        {{#if isEditing}}
+          <div class="ws-feature-list">
+            {{#each features as |entry|}}
+            <div class="ws-feature-row">
+              <textarea class="ws-textarea" name="system.features.{{entry.index}}.text">{{entry.text}}</textarea>
+              <div class="ws-feature-row-foot">
+                <select class="ws-meta-sel" name="system.features.{{entry.index}}.activation">
+                  {{selectOptions ../activationOptions selected=entry.activation valueAttr="value" labelAttr="label" localize=true}}
+                </select>
+                <button type="button" class="ws-feature-remove" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          <button type="button" class="ws-feature-add">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Item.AddFeature"}}
+          </button>
+        {{else}}
+          <div class="ws-feature-list-view">
+            {{#each features as |entry|}}
+            <div class="ws-feature-view-row">
+              {{#if entry.activationLabel}}<span class="ws-tag ws-feature-activation-tag">{{entry.activationLabel}}</span>{{/if}}
+              <div class="ws-prose">{{{entry.text}}}</div>
+            </div>
+            {{else}}
+            <span class="ws-empty">—</span>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+
+    </div>
+  </section>
+
+</div>

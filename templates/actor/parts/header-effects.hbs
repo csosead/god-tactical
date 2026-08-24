@@ -1,0 +1,30 @@
+{{!-- Header effects strip — icon-only, name on hover via tooltip; no "Временные"/
+     "Постоянные" text labels, the two are told apart purely by icon color (see
+     .header-effects rules in god-tactical.css: light purple border = temporary,
+     blue border = permanent; harmful statuses stay red regardless of duration).
+     Shared by the Character and NPC sheets. The two data-effect-group wrapper divs are
+     load-bearing — actor-sheet.mjs's/npc-sheet.mjs's _patchEffectInsert()/
+     _patchEffectRemove() select into them by that attribute to patch a single row in
+     without a full re-render (see grit-track.hbs for the same shared-partial pattern). --}}
+<div class="header-effects">
+  <div class="effects-box-section" data-effect-group="temporary">
+    <div class="effects-box-list">
+      {{#each effectsMini.temporary as |effect|}}
+      <div class="effects-mini-row{{#if effect.negative}} negative{{/if}}{{#if effect.disabled}} is-disabled{{/if}}"
+           data-effect-id="{{effect.id}}" data-tooltip="{{effect.name}}" data-tooltip-direction="DOWN">
+        <img class="effects-mini-icon" src="{{effect.img}}" alt="">
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  <div class="effects-box-section" data-effect-group="passive">
+    <div class="effects-box-list">
+      {{#each effectsMini.passive as |effect|}}
+      <div class="effects-mini-row{{#if effect.negative}} negative{{/if}}{{#if effect.disabled}} is-disabled{{/if}}"
+           data-effect-id="{{effect.id}}" data-tooltip="{{effect.name}}" data-tooltip-direction="DOWN">
+        <img class="effects-mini-icon" src="{{effect.img}}" alt="">
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

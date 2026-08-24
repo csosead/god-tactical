@@ -1,0 +1,38 @@
+{
+  "name": "Акетон",
+  "type": "armor",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "archetype": "heavy",
+    "subtype": "underarmor",
+    "description": "",
+    "drawbackName": "",
+    "drawbackText": "",
+    "vulnerability1": "cutting",
+    "vulnerability2": "piercing",
+    "rarity": "widespread",
+    "equipped": false,
+    "armorCells": 0
+  },
+  "_id": "WxYX0BWTH5zAwTC4",
+  "effects": [],
+  "folder": "NhpMvW422bDEi18o",
+  "sort": 200000,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783857700349,
+    "modifiedTime": 1783859596305,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!WxYX0BWTH5zAwTC4"
+}

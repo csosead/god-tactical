@@ -1,0 +1,90 @@
+{{!-- Brain SVG stages based on NF percent: 0-25 intact, 25-50 cleave, 50-75 cracks, 75-100 fragmented --}}
+{{#if (lte pct 25)}}
+<svg viewBox="0 0 60 66">
+  <defs>
+    <radialGradient id="b0-{{actor.id}}" cx="50%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#d47272" />
+      <stop offset="70%" stop-color="#8c3a3a" />
+      <stop offset="100%" stop-color="#4a1414" />
+    </radialGradient>
+  </defs>
+  <path d="M 30 4 C 44 4 54 14 54 28 C 54 42 48 56 36 60 L 24 60 C 12 56 6 42 6 28 C 6 14 16 4 30 4 Z"
+        fill="url(#b0-{{actor.id}})" stroke="#4a1414" stroke-width="0.8" />
+  <path d="M 30 5 Q 28 30 30 59" stroke="#4a1414" stroke-width="0.7" fill="none" opacity="0.8"/>
+  <g stroke="#4a1414" stroke-width="0.6" fill="none" opacity="0.75">
+    <path d="M 14 20 Q 20 16 26 22 T 40 24" />
+    <path d="M 12 32 Q 22 28 32 34 T 48 32" />
+    <path d="M 16 44 Q 24 40 34 46 T 50 42" />
+    <path d="M 20 54 Q 28 50 36 56" />
+    <path d="M 20 12 Q 26 18 30 14" />
+    <path d="M 36 14 Q 42 20 48 16" />
+  </g>
+  <path d="M 26 58 Q 30 64 34 58 L 33 62 Q 30 65 27 62 Z" fill="#8c3a3a" stroke="#4a1414" stroke-width="0.6"/>
+</svg>
+{{else if (lte pct 50)}}
+<svg viewBox="0 0 60 66">
+  <defs>
+    <radialGradient id="b1l-{{actor.id}}" cx="70%" cy="35%" r="80%">
+      <stop offset="0%" stop-color="#b86060" />
+      <stop offset="100%" stop-color="#742f2f" />
+    </radialGradient>
+    <radialGradient id="b1r-{{actor.id}}" cx="30%" cy="35%" r="80%">
+      <stop offset="0%" stop-color="#b86060" />
+      <stop offset="100%" stop-color="#742f2f" />
+    </radialGradient>
+  </defs>
+  <path d="M 28 6 C 16 6 6 16 6 30 C 6 44 14 58 24 61 L 28 58 Q 26 30 28 6 Z"
+        fill="url(#b1l-{{actor.id}})" stroke="#3a0f0f" stroke-width="0.8" />
+  <path d="M 32 6 C 44 6 54 16 54 30 C 54 44 46 58 36 61 L 32 58 Q 34 30 32 6 Z"
+        fill="url(#b1r-{{actor.id}})" stroke="#3a0f0f" stroke-width="0.8" />
+  <path d="M 30 20 Q 29 30 30 40 Q 31 50 30 56" stroke="#3a0f0f" stroke-width="0.5" fill="none" opacity="0.5"/>
+  <circle cx="30" cy="64" r="1.2" fill="#742f2f"/>
+  <circle cx="28" cy="62" r="0.6" fill="#742f2f"/>
+</svg>
+{{else if (lte pct 75)}}
+<svg viewBox="0 0 60 66">
+  <defs>
+    <radialGradient id="b2-{{actor.id}}" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#9a5050" />
+      <stop offset="100%" stop-color="#2a0a0a" />
+    </radialGradient>
+  </defs>
+  <path d="M 30 5 C 44 5 54 15 54 28 C 54 42 48 56 36 60 L 24 60 C 12 56 6 42 6 28 C 6 15 16 5 30 5 Z"
+        fill="url(#b2-{{actor.id}})" stroke="#2a0a0a" stroke-width="0.8" />
+  <path d="M 30 5 L 28 18 L 32 26 L 26 36 L 30 46 L 28 60" stroke="#2a0a0a" stroke-width="1.1" fill="none"/>
+  <path d="M 14 22 L 22 26 L 18 32" stroke="#2a0a0a" stroke-width="0.8" fill="none"/>
+  <path d="M 46 22 L 38 26 L 42 32" stroke="#2a0a0a" stroke-width="0.8" fill="none"/>
+  <path d="M 12 40 L 20 42 L 16 50" stroke="#2a0a0a" stroke-width="0.7" fill="none"/>
+  <path d="M 48 40 L 40 42 L 44 50" stroke="#2a0a0a" stroke-width="0.7" fill="none"/>
+  <g stroke="#2a0a0a" stroke-width="0.6" fill="none" opacity="0.75">
+    <path d="M 14 20 Q 20 16 26 22 T 40 24" />
+    <path d="M 12 32 Q 22 28 32 34 T 48 32" />
+    <path d="M 16 44 Q 24 40 34 46 T 50 42" />
+    <path d="M 20 54 Q 28 50 36 56" />
+    <path d="M 20 12 Q 26 18 30 14" />
+    <path d="M 36 14 Q 42 20 48 16" />
+  </g>
+  <path d="M 30 60 Q 30 66 28 70" stroke="#5c2525" stroke-width="1.2" fill="none"/>
+</svg>
+{{else}}
+<svg viewBox="0 0 60 66">
+  <defs>
+    <radialGradient id="b3-{{actor.id}}" cx="50%" cy="40%" r="75%">
+      <stop offset="0%" stop-color="#7d4848" />
+      <stop offset="100%" stop-color="#1c0808" />
+    </radialGradient>
+  </defs>
+  <path d="M 18 14 C 12 14 8 22 10 30 Q 6 36 12 42 Q 10 50 18 54 L 26 54 Q 30 58 34 54 L 42 54 Q 50 50 46 42 Q 52 36 48 30 Q 52 22 44 14 Q 36 10 30 14 Q 24 10 18 14 Z"
+        fill="url(#b3-{{actor.id}})" stroke="#1c0808" stroke-width="0.8" />
+  <path d="M 4 20 L 10 18 L 8 24 Z" fill="#4a1e1e" stroke="#1c0808" stroke-width="0.5"/>
+  <path d="M 50 18 L 56 22 L 52 26 Z" fill="#4a1e1e" stroke="#1c0808" stroke-width="0.5"/>
+  <path d="M 6 48 L 12 50 L 9 54 Z" fill="#4a1e1e" stroke="#1c0808" stroke-width="0.5"/>
+  <path d="M 54 50 L 50 54 L 56 54 Z" fill="#4a1e1e" stroke="#1c0808" stroke-width="0.5"/>
+  <circle cx="16" cy="60" r="1.4" fill="#4a1e1e"/>
+  <circle cx="44" cy="62" r="1.1" fill="#4a1e1e"/>
+  <circle cx="30" cy="64" r="0.9" fill="#4a1e1e"/>
+  <path d="M 14 24 L 22 30 L 18 36 L 28 40 L 22 48" stroke="#1c0808" stroke-width="0.8" fill="none"/>
+  <path d="M 46 24 L 38 30 L 42 36 L 32 40 L 38 48" stroke="#1c0808" stroke-width="0.8" fill="none"/>
+  <path d="M 30 18 L 32 30 L 28 40 L 32 50" stroke="#1c0808" stroke-width="1" fill="none"/>
+</svg>
+{{/if}}

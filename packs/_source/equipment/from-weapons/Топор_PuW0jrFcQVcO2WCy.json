@@ -1,0 +1,48 @@
+{
+  "name": "Топор",
+  "type": "weapon",
+  "img": "systems/god-tactical/packs/icons/weapons/Топор.png",
+  "system": {
+    "hands": "main",
+    "size": "small",
+    "natisk": [
+      {
+        "rangeModifier": 5,
+        "templateShape": "line",
+        "templateSize": 1
+      },
+      {
+        "rangeModifier": 4,
+        "templateShape": "triangle",
+        "templateSize": 4
+      }
+    ],
+    "damageType": "cutting",
+    "property": "<p>Эффект: ломает препятствия, оказавшиеся в зоне поражения — деревянные ящики, бочки, перекладины, заборы. Только из тонкого дерева.</p>",
+    "rarity": "widespread",
+    "description": "",
+    "brosok": [],
+    "skill": "impulse"
+  },
+  "_id": "PuW0jrFcQVcO2WCy",
+  "effects": [],
+  "folder": "bWH59KYRSvUqHexY",
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358247747,
+    "modifiedTime": 1783787278830,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!PuW0jrFcQVcO2WCy"
+}

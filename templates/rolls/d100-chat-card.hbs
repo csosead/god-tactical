@@ -1,0 +1,134 @@
+<div class="god-roll-chat">
+  {{#if result.rollSource.name}}
+  <div class="roll-source-tag">
+    {{result.rollSource.name}}
+    {{#if result.rollSource.charName}} <span class="roll-source-char">· {{result.rollSource.charName}}</span>{{/if}}
+    {{#if result.rollSource.viaSkill}} <span class="roll-source-char">(вместо {{result.rollSource.viaSkill}})</span>{{/if}}
+  </div>
+  {{/if}}
+
+  {{! result.noRoll — an NPC "deal damage" card (module/rolls/npc-attack.mjs): a flat base
+      number applied with no dice at all (rulebook: NPCs never roll). Skips every section
+      that only makes sense for an actual d100 roll (outcome header, die box, dice list,
+      success range) — leaves just the source tag + damage + per-target breakdown below,
+      the same template player attack rolls already use for that part. }}
+  {{#unless result.noRoll}}
+  <div class="roll-result-header {{result.outcomeClass}}">
+    <span class="result-outcome">{{result.outcome}}</span>
+  </div>
+
+  {{#if result.mezzanineDrive}}
+  <div class="roll-mezzanine-result-tag">
+    Мезонин — {{result.mezzanineDrive}} (приоритет {{result.mezzanineRank}})
+    {{#if (eq result.mezzanineConsequence "light")}} — успех с лёгким последствием{{/if}}
+    {{#if (eq result.mezzanineConsequence "heavy")}} — успех с тяжёлым последствием{{/if}}
+  </div>
+  {{/if}}
+
+  <div class="roll-result-big {{result.outcomeClass}}">
+    {{#if result.chosen}}
+      {{padStart result.chosen 2 '0'}}
+    {{else}}
+      —
+    {{/if}}
+  </div>
+
+  {{#if (gt result.diceCount 1)}}
+  <div class="roll-dice-list">
+    {{#each result.rolls as |r idx|}}
+    <span class="roll-die {{#if (eq r ../result.chosen)}}chosen {{../result.rollType}}{{else}}discarded{{/if}}">
+      {{padStart r 2 '0'}}
+    </span>
+    {{#unless @last}}<span class="roll-die-sep">→</span>{{/unless}}
+    {{/each}}
+  </div>
+  {{/if}}
+
+  <div class="roll-details">
+    <div class="roll-detail-row">
+      <span class="detail-label">{{ localize "GOD.Roll.Range" }}:</span>
+      <span class="detail-value">{{padStart result.range.from 2 '0'}} – {{padStart result.range.to 2 '0'}}</span>
+    </div>
+  </div>
+  {{/unless}}
+
+  {{#if result.weaponDamage}}
+  <div class="roll-weapon-damage">
+    <span class="roll-dmg-label">УРОН</span>
+    <span class="roll-dmg-value">{{result.weaponDamage}}</span>
+  </div>
+  {{/if}}
+
+  {{#if result.defenseLabel}}
+  <div class="roll-weapon-damage">
+    <span class="roll-dmg-label">{{result.defenseLabel}}</span>
+    <span class="roll-dmg-value">{{result.defenseValue}}</span>
+  </div>
+  {{/if}}
+
+  {{#if result.attackTargets.length}}
+  <div class="roll-attack-targets">
+    {{#each result.attackTargets}}
+    {{! outcomeTier — one of full/half/quarter/zero, combineAttackOutcome's fold of THREE
+        independent halving factors (cover half, ranged height-tier half, "hears not sees" —
+        see attack-cover-targets.mjs): 0 active → full (red), 1 → half (orange), 2 → quarter
+        (green), all 3 at once → zero (grey ✕, a clean miss, not an eighth). Cover FULL or a
+        ZERO height-tier are their own hard misses, same grey ✕. The breakdown line spells out
+        WHICH factors are active so the number is never a black box. }}
+    <div class="rat-entry">
+      {{#if (eq this.outcomeTier "zero")}}
+      <div class="rat-row rat-outcome-zero">
+        <span class="rat-name">{{this.name}}</span>
+        <span class="rat-result">✕ нет урона</span>
+      </div>
+      {{else if (eq this.outcomeTier "quarter")}}
+      <div class="rat-row rat-outcome-quarter">
+        <span class="rat-name">{{this.name}}</span>
+        <span class="rat-result">¼ → {{this.damage}}</span>
+      </div>
+      {{else if (eq this.outcomeTier "half")}}
+      <div class="rat-row rat-outcome-half">
+        <span class="rat-name">{{this.name}}</span>
+        <span class="rat-result">½ → {{this.damage}}</span>
+      </div>
+      {{else}}
+      <div class="rat-row rat-outcome-full">
+        <span class="rat-name">{{this.name}}</span>
+        <span class="rat-result">{{this.damage}}</span>
+      </div>
+      {{/if}}
+      {{#if (eq this.level "half")}}<span class="rat-factor">🧱 укрытие</span>{{/if}}
+      {{#if (eq this.level "full")}}<span class="rat-factor rat-factor-hard">🧱 полное укрытие</span>{{/if}}
+      {{#if (eq this.heightTier "half")}}<span class="rat-factor">📏 высота</span>{{/if}}
+      {{#if (eq this.heightTier "zero")}}<span class="rat-factor rat-factor-hard">📏 недосягаемая высота</span>{{/if}}
+      {{#if this.hearNotSee}}<span class="rat-factor">👂 не видит</span>{{/if}}
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if result.competencyEligible}}
+  {{#unless result.hasCompetency}}
+  <button type="button" class="roll-competency-btn" data-action="god-competency" title="Дубль в успехе — Триумф только при наличии компетенции">
+    <i class="fas fa-medal"></i> Есть компетенция
+  </button>
+  {{/unless}}
+  {{/if}}
+
+  {{#if result.mezzanineEligible}}
+  {{#unless result.mezzanineUsed}}
+  <div class="roll-mezzanine-box">
+    <div class="rmz-label">Мезонин — что двигало этим действием?</div>
+    <div class="rmz-drives">
+      {{#each result.mezzanineDrives as |d|}}
+      <button type="button" class="rmz-drive-btn" data-action="god-mezzanine" data-drive="{{d.key}}" title="Приоритет {{d.rank}} — {{d.hint}}">
+        {{d.name}} <span class="rmz-rank">{{d.rank}}</span>
+      </button>
+      {{else}}
+      <span class="rmz-empty">Приоритеты Мезонин ещё не заданы на листе персонажа.</span>
+      {{/each}}
+    </div>
+  </div>
+  {{/unless}}
+  {{/if}}
+</div>

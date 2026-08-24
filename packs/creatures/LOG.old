@@ -1,0 +1,8 @@
+2026/08/23-17:41:42.414 ac48 Recovering log #397
+2026/08/23-17:41:42.417 ac48 Delete type=0 #397
+2026/08/23-17:41:42.417 ac48 Delete type=3 #396
+2026/08/23-18:21:41.774 6ad4 Level-0 table #401: started
+2026/08/23-18:21:41.774 6ad4 Level-0 table #401: 0 bytes OK
+2026/08/23-18:21:41.775 6ad4 Delete type=0 #399
+2026/08/23-18:21:41.778 6ad4 Manual compaction at level-0 from '!items!AVPMYQuKGbj743yL' @ 72057594037927935 : 1 .. '!items!hTsXFwvAwCTnTWmA' @ 0 : 0; will stop at (end)
+2026/08/23-18:21:41.778 6ad4 Manual compaction at level-1 from '!items!AVPMYQuKGbj743yL' @ 72057594037927935 : 1 .. '!items!hTsXFwvAwCTnTWmA' @ 0 : 0; will stop at (end)

@@ -1,0 +1,49 @@
+{
+  "name": "Длинный лук",
+  "type": "weapon",
+  "img": "systems/god-tactical/packs/icons/weapons/Длинный лук.png",
+  "system": {
+    "hands": "two",
+    "size": "medium",
+    "brosok": [
+      {
+        "rangeModifier": 32,
+        "templateShape": "circle",
+        "templateSize": 2
+      }
+    ],
+    "damageType": "piercing",
+    "property": "<p>Стреляет без перезарядки, если колчан со стрелами в среднем слоте.</p>",
+    "rarity": "veryCommon",
+    "description": "",
+    "natisk": [
+      {
+        "rangeModifier": 28,
+        "templateShape": "line",
+        "templateSize": 1
+      }
+    ],
+    "skill": "sensorics"
+  },
+  "_id": "uW4UJGomooAdR2Q5",
+  "effects": [],
+  "folder": "bWH59KYRSvUqHexY",
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358247747,
+    "modifiedTime": 1783787152479,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!uW4UJGomooAdR2Q5"
+}

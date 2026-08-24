@@ -1,0 +1,13 @@
+{{!-- Vertical icon-only tab rail — separate ApplicationV2 part (see npc-sheet.mjs's
+     PARTS), sibling of the "sheet" part rather than nested inside it. Same reasoning as
+     character-sheet's tab-rail.hbs: .npc-sheet scrolls internally, so anything nested in
+     it gets dragged into that scroll no matter its own overflow value; being a genuine
+     sibling lets it poke past the sheet's right edge instead. --}}
+<div class="npc-tabs" data-group="primary">
+  <button type="button" class="tab {{#if (eq activeTab 'bio')}}active{{/if}}" data-tab="bio" data-group="primary" data-tooltip="Свойства" data-tooltip-direction="LEFT">
+    <i class="fas fa-cogs"></i>
+  </button>
+  <button type="button" class="tab {{#if (eq activeTab 'anketa')}}active{{/if}}" data-tab="anketa" data-group="primary" data-tooltip="Инвентарь" data-tooltip-direction="LEFT">
+    <i class="fas fa-boxes-stacked"></i>
+  </button>
+</div>

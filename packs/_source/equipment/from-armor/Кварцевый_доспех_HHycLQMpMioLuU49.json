@@ -1,0 +1,37 @@
+{
+  "name": "Кварцевый доспех",
+  "type": "armor",
+  "img": "systems/god-tactical/packs/icons/armor/Кварцевый доспех.png",
+  "system": {
+    "archetype": "heavy",
+    "drawbackName": "Звонкий",
+    "drawbackText": "<p>Когда: любая сцена, требующая тишины. Что: кристаллы хрустят и бликуют — действие Скрытность недоступно (кроме кромешной тьмы).</p>",
+    "vulnerability1": "electric",
+    "vulnerability2": "freezing",
+    "rarity": "veryRare",
+    "description": "<p>Доспех из пластин дымчатого кварца с прожилками рудных вкраплений, скреплённых в жёсткий панцирь. Кристалл невероятно твёрд — клинок и остриё скользят по гранёной поверхности, дробящий удар вязнет в камне. Но у твёрдости своя цена: резкий холод заставляет кристалл мгновенно трескаться, а удар тока проходит по рудным жилам внутрь, вызывая резонанс, который раскалывает доспех изнутри. Редкий доспех тех, кто добрался до глубинных залежей.</p>",
+    "equipped": false,
+    "armorCells": 6
+  },
+  "_id": "HHycLQMpMioLuU49",
+  "effects": [],
+  "folder": "Fik3NbQ9dRXyPCB9",
+  "sort": 300000,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358248288,
+    "modifiedTime": 1784099731321,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!HHycLQMpMioLuU49"
+}

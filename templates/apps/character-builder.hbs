@@ -1,0 +1,284 @@
+<div class="god-character-builder">
+  <div class="cb-steps">
+    <div class="cb-step-dot {{#if (eq step 0)}}active{{/if}}">1</div>
+    <div class="cb-step-dot {{#if (eq step 1)}}active{{/if}}">2</div>
+    <div class="cb-step-dot {{#if (eq step 2)}}active{{/if}}">3</div>
+    <div class="cb-step-dot {{#if (eq step 3)}}active{{/if}}">4</div>
+    <div class="cb-step-dot {{#if (eq step 4)}}active{{/if}}">5</div>
+    <div class="cb-step-dot {{#if (eq step 5)}}active{{/if}}">6</div>
+    <div class="cb-step-dot {{#if (eq step 6)}}active{{/if}}">7</div>
+    <div class="cb-step-dot {{#if (eq step 7)}}active{{/if}}">8</div>
+  </div>
+
+  <div class="cb-scroll">
+  {{#if (eq step 0)}}
+  <section class="cb-page cb-page-bio">
+    <h2>{{localize "GOD.CharBuilder.StepBio"}}</h2>
+    <div class="cb-field">
+      <label>{{localize "GOD.CharBuilder.Name"}}</label>
+      <input type="text" name="builder-name" value="{{bio.name}}" placeholder="{{localize 'GOD.CharBuilder.Name'}}" autofocus>
+    </div>
+    <div class="cb-field">
+      <label>{{localize "GOD.CharBuilder.Nickname"}}</label>
+      <input type="text" name="builder-nickname" value="{{bio.nickname}}" placeholder="{{localize 'GOD.CharBuilder.Nickname'}}">
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 1)}}
+  <section class="cb-page cb-page-pick">
+    <h2>{{localize "GOD.CharBuilder.StepRace"}}</h2>
+    <div class="cb-pick-grid">
+      {{#each races}}
+      <div class="cb-pick-card builder-race-card{{#if this.selected}} selected{{/if}}" data-uuid="{{this.uuid}}" data-tooltip-html="{{this.tooltipHtml}}" data-tooltip-class="cb-info-tooltip">
+        <img src="{{this.img}}" alt="">
+        <span>{{this.name}}</span>
+      </div>
+      {{else}}
+      <p class="cb-empty">{{localize "GOD.CharBuilder.NoRaces"}}</p>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 2)}}
+  <section class="cb-page cb-page-pick">
+    <h2>{{localize "GOD.CharBuilder.StepClass"}}</h2>
+    <div class="cb-pick-grid">
+      {{#each classes}}
+      <div class="cb-pick-card builder-class-card{{#if this.selected}} selected{{/if}}" data-uuid="{{this.uuid}}" data-tooltip-html="{{this.tooltipHtml}}" data-tooltip-class="cb-info-tooltip">
+        <img src="{{this.img}}" alt="">
+        <span>{{this.name}}</span>
+      </div>
+      {{else}}
+      <p class="cb-empty">{{localize "GOD.CharBuilder.NoClasses"}}</p>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 3)}}
+  <section class="cb-page cb-page-competencies">
+    <h2>{{localize "GOD.CharBuilder.StepClassCompetencies"}}</h2>
+    <p class="cb-step-hint">{{localize "GOD.CharBuilder.ClassCompetenciesHint"}} ({{classCompetencyCount}}/{{classCompetencyPickCount}})</p>
+    <div class="cb-comp-chips">
+      {{#each classCompetencies}}
+      <button type="button" class="cb-class-competency-chip{{#if this.selected}} selected{{/if}}{{#if this.takenElsewhere}} taken{{/if}}" data-name="{{this.name}}" {{#if this.takenElsewhere}}disabled data-tooltip="{{localize 'GOD.CharBuilder.CompetencyTakenHint'}}"{{/if}}>{{this.name}}</button>
+      {{else}}
+      <p class="cb-empty">{{localize "GOD.CharBuilder.NoClassCompetencies"}}</p>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 4)}}
+  <section class="cb-page cb-page-competencies">
+    <h2>{{localize "GOD.CharBuilder.StepCompetencies"}}</h2>
+    <p class="cb-step-hint">{{localize "GOD.CharBuilder.CompetenciesHint"}} ({{competencyCount}}/{{competencyPickCount}})</p>
+    <div class="cb-comp-groups">
+      {{#each competencyGroups}}
+      <div class="cb-comp-group">
+        <div class="cb-comp-group-name">{{this.name}}</div>
+        <div class="cb-comp-chips">
+          {{#each this.competencies}}
+          <button type="button" class="cb-competency-chip{{#if this.selected}} selected{{/if}}{{#if this.takenElsewhere}} taken{{/if}}" data-name="{{this.name}}" {{#if this.takenElsewhere}}disabled data-tooltip="{{localize 'GOD.CharBuilder.CompetencyTakenHint'}}"{{/if}}>{{this.name}}</button>
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 5)}}
+  <section class="cb-page cb-page-items">
+    <h2>{{localize "GOD.CharBuilder.StepItems"}}</h2>
+    <p class="cb-step-hint">{{localize "GOD.CharBuilder.ItemsHint"}}</p>
+
+    <div class="cb-items-section">
+      <div class="cb-items-subhead">{{localize "GOD.CharBuilder.KitItemsTitle"}}</div>
+      <div class="cb-kit-list">
+        {{#each items.kitItems}}
+        <div class="cb-kit-row">
+          <img class="cb-kit-img" src="{{this.img}}" alt="">
+          <span class="cb-kit-name">{{this.name}}</span>
+          <span class="cb-kit-type">{{this.typeLabel}}</span>
+        </div>
+        {{else}}
+        <p class="cb-empty">{{localize "GOD.CharBuilder.NoKitItems"}}</p>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="cb-items-section">
+      <div class="cb-items-subhead">{{localize "GOD.CharBuilder.TrophiesTitle"}}</div>
+      <div class="cb-trophy-list">
+        {{#each items.kitTrophies}}
+        <div class="cb-trophy-card{{#if this.selected}} selected{{/if}}" data-key="{{this.key}}">
+          <img class="cb-trophy-img" src="{{this.img}}" alt="">
+          <span class="cb-trophy-name">{{this.name}}</span>
+          <div class="rarity-value rarity-value-sm">
+            <span class="rarity-number">{{this.rarityValue}}</span>
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+          <span class="cb-trophy-select-hint">
+            {{#if this.selected}}{{localize "GOD.CharBuilder.TrophyArmed"}}{{else}}{{localize "GOD.CharBuilder.TrophySelectHint"}}{{/if}}
+          </span>
+        </div>
+        {{else}}
+        <p class="cb-empty">{{localize "GOD.CharBuilder.NoTrophies"}}</p>
+        {{/each}}
+      </div>
+      {{#if items.offerRarity}}
+      <div class="cb-offer-summary{{#if items.offerActive}} active{{/if}}">
+        <span class="cb-offer-label">
+          {{#if items.offerActive}}{{localize "GOD.CharBuilder.OfferRemainingLabel"}}{{else}}{{localize "GOD.CharBuilder.OfferRarityLabel"}}{{/if}}
+        </span>
+        <div class="rarity-value rarity-value-sm">
+          <span class="rarity-number">{{items.offerRarity}}</span>
+          <i class="fas fa-gem rarity-gem"></i>
+        </div>
+        {{#if items.combining}}<span class="cb-offer-combined-badge">{{localize "GOD.CharBuilder.OfferCombinedBadge"}}</span>{{/if}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{#if items.tradeGroups.length}}
+    <div class="cb-items-section">
+      <div class="cb-items-subhead">{{localize "GOD.CharBuilder.TradesTitle"}}</div>
+      <div class="cb-trade-list">
+        {{#each items.tradeGroups}}
+        <div class="cb-trade-group">
+          <div class="cb-trade-group-items">
+            {{#each this.items}}
+            <div class="cb-trade-row">
+              <img class="cb-trade-img" src="{{this.img}}" alt="">
+              <span class="cb-trade-name">{{this.name}}</span>
+              <div class="rarity-value rarity-value-sm">
+                <span class="rarity-number">{{this.rarityValue}}</span>
+                <i class="fas fa-gem rarity-gem"></i>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          <button type="button" class="cb-trade-undo" data-id="{{this.id}}">
+            {{#if this.multi}}{{localize "GOD.CharBuilder.UndoTradeGroup"}}{{else}}{{localize "GOD.CharBuilder.UndoTrade"}}{{/if}}
+          </button>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    <div class="cb-items-section">
+      <div class="cb-items-subhead">{{localize "GOD.CharBuilder.EquipmentTitle"}}</div>
+      <input type="text" class="cb-equip-search" value="{{items.search}}" placeholder="{{localize 'GOD.CharBuilder.EquipmentSearchPlaceholder'}}">
+      <div class="cb-equip-list">
+        {{#each items.equipment}}
+        <div class="cb-equip-row{{#if this.traded}} traded{{/if}}{{#if this.canTrade}} tradeable{{/if}}" data-tooltip-html="{{this.tooltipHtml}}" data-tooltip-class="cb-info-tooltip">
+          <img class="cb-equip-img" src="{{this.img}}" alt="">
+          <span class="cb-equip-name">{{this.name}}</span>
+          <span class="cb-equip-type">{{this.typeLabel}}</span>
+          <div class="rarity-value rarity-value-sm">
+            <span class="rarity-number">{{this.rarityValue}}</span>
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+          {{#if this.traded}}
+            <span class="cb-equip-traded-badge">{{localize "GOD.CharBuilder.Traded"}}</span>
+          {{else}}
+            <button type="button" class="cb-equip-trade" data-uuid="{{this.uuid}}" data-tooltip="{{this.disabledReason}}" {{#unless this.canTrade}}disabled{{/unless}}>
+              {{localize "GOD.CharBuilder.TradeButton"}}
+            </button>
+          {{/if}}
+        </div>
+        {{else}}
+        <p class="cb-empty">{{localize "GOD.CharBuilder.NoEquipment"}}</p>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 6)}}
+  <section class="cb-page cb-page-mezzanine">
+    <h2>{{localize "GOD.CharBuilder.StepMezzanine"}}</h2>
+    <p class="cb-step-hint">{{localize "GOD.CharBuilder.MezzanineHint"}}</p>
+    <div class="cb-drive-list">
+      {{#each drives.drives as |d|}}
+      <div class="cb-drive-card{{#if d.rank}} ranked{{/if}}" data-key="{{d.key}}">
+        <span class="cb-drive-rank-badge">{{#if d.rank}}{{d.rank}}{{else}}—{{/if}}</span>
+        <span class="cb-drive-name">{{d.name}}</span>
+        {{#unless d.rank}}<span class="cb-drive-hint">{{localize "GOD.CharBuilder.MezzanineClickHint"}}</span>{{/unless}}
+      </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if (eq step 7)}}
+  <section class="cb-page cb-page-alloc">
+    <h2>{{localize "GOD.CharBuilder.StepAlloc"}}</h2>
+    <div class="cb-xp-bar">
+      <label class="cb-xp-remaining{{#if (lte alloc.remaining 0)}} zero{{/if}}">
+        {{localize "GOD.CharBuilder.Remaining"}}:
+        <input type="number" class="cb-xp-remaining-input" value="{{alloc.remaining}}" min="0" step="1">
+      </label>
+      <span class="cb-xp-spent">{{localize "GOD.CharBuilder.Spent"}}: {{alloc.spent}}</span>
+    </div>
+
+    <div class="cb-blocks">
+      {{#each alloc.blocks}}
+      <div class="cb-block cb-cat-{{this.char.css}}">
+        <div class="cb-block-char">
+          <span class="cb-char-name">
+            {{this.char.name}}
+            {{#if this.char.raceBonus}}<span class="cb-skill-classbonus" data-tooltip="{{localize 'GOD.CharBuilder.RaceBonusTitle'}}">{{this.char.raceBonusFormatted}}</span>{{/if}}
+          </span>
+          <button type="button" class="cb-step-btn" data-action="char-dec" data-key="{{this.char.key}}" {{#unless this.char.canDec}}disabled{{/unless}}>&minus;</button>
+          <span class="cb-char-value" data-tooltip="{{this.char.valueTooltip}}">{{this.char.effectiveValue}}</span>
+          <button type="button" class="cb-step-btn" data-action="char-inc" data-key="{{this.char.key}}" {{#unless this.char.canInc}}disabled{{/unless}}>+</button>
+          <span class="cb-char-cost">{{this.char.cost}} XP</span>
+        </div>
+
+        <div class="cb-block-skills">
+          {{#each this.skills}}
+          <div class="cb-skill-row">
+            <div class="cb-skill-main">
+              <span class="cb-skill-name">
+                {{this.name}}
+                {{#if this.classBonus}}<span class="cb-skill-classbonus" data-tooltip="{{localize 'GOD.CharBuilder.ClassBonusTitle'}}">+{{this.classBonus}}</span>{{/if}}
+              </span>
+              <div class="skill-rank-marks">
+                {{#each this.rankBoxes}}
+                <div class="skill-rank-mark{{#if this.active}} filled{{/if}}{{#if this.isBonus}} bonus{{/if}}{{#if this.locked}} locked{{/if}}" data-skill="{{../key}}" data-char="{{../charKey}}" data-index="{{this.index}}" data-tooltip="{{this.tooltip}}" data-tooltip-direction="UP">
+                  <i class="fas fa-star"></i>
+                </div>
+                {{/each}}
+              </div>
+              <span class="cb-skill-value">{{localize "GOD.CharBuilder.Value"}}: {{this.value}}</span>
+            </div>
+            {{#if this.nextRankHint}}
+            <div class="cb-skill-hint{{#if this.nextRankHint.locked}} locked{{/if}}" data-tooltip="{{this.nextRankHint.tooltip}}" data-tooltip-direction="UP">Ранг {{this.nextRankHint.rank}}: {{this.nextRankHint.cost}} XP</div>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+  </div>
+
+  <footer class="cb-footer">
+    {{#unless isFirst}}
+    <button type="button" class="cb-btn" data-action="builder-back">{{localize "GOD.CharBuilder.Back"}}</button>
+    {{/unless}}
+    <span class="cb-step-indicator">{{stepIndex}} / {{stepCount}}</span>
+    {{#if isLast}}
+    <button type="button" class="cb-btn bright" data-action="builder-finish">{{localize "GOD.CharBuilder.Finish"}}</button>
+    {{else}}
+    <button type="button" class="cb-btn bright" data-action="builder-next">{{localize "GOD.CharBuilder.Next"}}</button>
+    {{/if}}
+  </footer>
+</div>

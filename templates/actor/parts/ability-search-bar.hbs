@@ -1,0 +1,11 @@
+{{!-- Abilities search — same mechanism as Inventory's own bar (see
+     module/sheets/item-search.mjs's bindAbilitySearch), just its own outer class so the
+     two bars' querySelectors never collide when both tabs are in the DOM at once.
+     Replaces the old type/subtype/class/activation/rarity chip filter bar. --}}
+{{#if hasFeatures}}
+<div class="ability-search-bar">
+  <i class="fas fa-magnifying-glass"></i>
+  <input type="text" class="inv-search-input" placeholder="Поиск по способностям…" autocomplete="off">
+  <button type="button" class="inv-search-clear" title="Очистить"><i class="fas fa-xmark"></i></button>
+</div>
+{{/if}}

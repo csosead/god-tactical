@@ -1,0 +1,201 @@
+<div class="equip-sheet class-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Base Damage — FOUR flat class-wide numbers (2026-08-19: split physical/
+         metaphysical × melee/ranged, see items.mjs's ClassDataModel doc comment on
+         baseMelee/baseRanged/baseMetaphysicalMelee/baseMetaphysicalRanged). Which one an
+         attack roll reads is resolved from the triggering weapon/ability item's own
+         damageNature + attackType fields (module/combat/combat-damage.mjs's
+         classBaseField, module/rolls/roll-dialog.mjs). -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Class.Damage"}}</div>
+      <div class="cls-triplet-row">
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.BasePhysicalMelee"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.baseMelee" value="{{system.baseMelee}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.baseMelee}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.BasePhysicalRanged"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.baseRanged" value="{{system.baseRanged}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.baseRanged}}</span>
+          {{/if}}
+        </div>
+      </div>
+      <div class="cls-triplet-row">
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.BaseMetaphysicalMelee"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.baseMetaphysicalMelee" value="{{system.baseMetaphysicalMelee}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.baseMetaphysicalMelee}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.BaseMetaphysicalRanged"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.baseMetaphysicalRanged" value="{{system.baseMetaphysicalRanged}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.baseMetaphysicalRanged}}</span>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Dodge/Fortitude — flat class-wide numbers (2026-08-18, see items.mjs's
+         ClassDataModel doc comment on dodgeBase/fortitudeBase). The character sheet's
+         headline Dodge/Fortitude is this number plus the equipped cuirass's own bonus
+         (CharacterDataModel.prepareDerivedData); a Выносливость/Ловкость skill roll
+         separately computes a tiered value off the same base, same formula as damage
+         (roll-dialog.mjs's DEFENSE_SKILLS). Push is deferred, so its per-tier editor
+         stays removed from this card — the underlying system.push field is kept. -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Class.Defense"}}</div>
+      <div class="cls-triplet-row">
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Dodge"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.dodgeBase" value="{{system.dodgeBase}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.dodgeBase}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Fortitude"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="number" name="system.fortitudeBase" value="{{system.fortitudeBase}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.fortitudeBase}}</span>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Компетенции — какие КАТЕГОРИИ рулбучного списка (см. журнал «Компетенции» в
+         компендиуме) эта класс-карточка открывает для выбора на первом шаге билдера;
+         сами компетенции внутри категории игрок выбирает уже в билдере, не здесь. -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Class.Competencies"}}</div>
+      <div class="cls-comp-list">
+        {{#each competencies as |comp|}}
+          <span class="cls-comp-chip">
+            {{comp.name}}
+            {{#if ../isEditing}}
+            <button type="button" class="cls-comp-remove" data-idx="{{comp.idx}}" title="{{localize 'GOD.Class.RemoveCompetency'}}">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            {{/if}}
+          </span>
+        {{else}}
+          <span class="ws-empty">—</span>
+        {{/each}}
+      </div>
+      {{#if isEditing}}
+      <button type="button" class="ws-range-add cls-comp-add-btn">
+        <i class="fa-solid fa-plus"></i> {{localize "GOD.Class.AddCompetency"}}
+      </button>
+      {{/if}}
+    </div>
+
+    <!-- Бонусы навыков — каждое вхождение навыка в списке даёт +1 к его эффективному рангу -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Class.SkillBonuses"}}</div>
+      <div class="cls-comp-list">
+        {{#each skillBonuses as |b|}}
+          <span class="cls-comp-chip">
+            +1 {{b.label}}
+            {{#if ../isEditing}}
+            <button type="button" class="cls-skillbonus-remove" data-idx="{{b.idx}}" title="{{localize 'GOD.Class.RemoveSkillBonus'}}">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            {{/if}}
+          </span>
+        {{else}}
+          <span class="ws-empty">—</span>
+        {{/each}}
+      </div>
+      {{#if isEditing}}
+      <button type="button" class="ws-range-add cls-skillbonus-add-btn">
+        <i class="fa-solid fa-plus"></i> {{localize "GOD.Class.AddSkillBonus"}}
+      </button>
+      {{/if}}
+    </div>
+
+    <!-- Granted Items (способности и т.д.) -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Item.GrantedItems"}}</div>
+      <div class="cls-grant-list">
+        {{#each grantedItems as |entry|}}
+          <div class="cls-grant-row" data-idx="{{entry.idx}}" draggable="{{#if ../isEditing}}true{{else}}false{{/if}}">
+            <img class="cls-grant-img" src="{{entry.img}}" alt="">
+            <span class="cls-grant-name" data-uuid="{{entry.uuid}}" title="{{localize 'GOD.Item.OpenGrantedItem'}}">{{entry.name}}</span>
+            <span class="cls-grant-type">{{entry.typeLabel}}</span>
+            {{#if ../isEditing}}
+              <button type="button" class="cls-grant-remove" data-idx="{{entry.idx}}" title="{{localize 'GOD.Item.RemoveGrantedItem'}}">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            {{/if}}
+          </div>
+        {{else}}
+          <span class="ws-empty">—</span>
+        {{/each}}
+      </div>
+      {{#if isEditing}}
+        <div class="cls-grant-dropzone">
+          <i class="fas fa-arrow-down"></i> {{localize "GOD.Item.DropGrantedItem"}}
+        </div>
+      {{/if}}
+    </div>
+
+    <!-- Стартовые предметы (набор + трофеи) — отдельный пул, читается напрямую шагом
+         выбора предметов Мастера создания персонажа, ничего отсюда не выдаётся
+         автоматически при добавлении класса. -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Item.StartingItems"}}</div>
+      <div class="cls-grant-list">
+        {{#each startingItems as |entry|}}
+          <div class="cls-grant-row cls-start-row" data-idx="{{entry.idx}}" draggable="{{#if ../isEditing}}true{{else}}false{{/if}}">
+            <img class="cls-grant-img" src="{{entry.img}}" alt="">
+            <span class="cls-grant-name cls-start-name" data-uuid="{{entry.uuid}}" title="{{localize 'GOD.Item.OpenGrantedItem'}}">{{entry.name}}</span>
+            <span class="cls-grant-type">{{entry.typeLabel}}</span>
+            {{#if ../isEditing}}
+              <button type="button" class="cls-grant-remove cls-start-remove" data-idx="{{entry.idx}}" title="{{localize 'GOD.Item.RemoveStartingItem'}}">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            {{/if}}
+          </div>
+        {{else}}
+          <span class="ws-empty">—</span>
+        {{/each}}
+      </div>
+      {{#if isEditing}}
+        <div class="cls-grant-dropzone cls-start-dropzone">
+          <i class="fas fa-arrow-down"></i> {{localize "GOD.Item.DropStartingItem"}}
+        </div>
+      {{/if}}
+    </div>
+
+  </section>
+
+</div>

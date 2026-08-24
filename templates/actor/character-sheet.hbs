@@ -1,0 +1,318 @@
+<div class="god-tactical character-sheet">
+  {{!-- Film overlays --}}
+  <div class="film-overlay scanlines"></div>
+  <div class="film-overlay grain"></div>
+  <div class="film-overlay vignette"></div>
+
+  <div class="sheet">
+    <span class="corner-mark tl"></span>
+    <span class="corner-mark tr"></span>
+    <span class="corner-mark bl"></span>
+    <span class="corner-mark br"></span>
+
+    {{!-- Top Bar --}}
+    <div class="topbar">
+      {{!-- Header portrait — small square thumbnail (character-sheet's usual circular/
+           large treatment is overridden just for this slot, see .topbar-portrait .portrait
+           in god-tactical.css). Armor loadout renders as an overlay strip across its
+           bottom edge, on top of the image layer. --}}
+      <div class="topbar-portrait">
+        <div class="sys-title">
+          <input class="sys-title-name" type="text" name="name" value="{{actor.name}}" placeholder="Имя «Кличка»">
+        </div>
+        <div class="portrait {{#if hasCriticalFlaw}}critical-state{{/if}} {{#if woundTrack.incapacitated}}incapacitated-state{{/if}}" data-edit="img" title="{{actor.name}}">
+          <div class="portrait-img">
+            {{#if portrait}}
+              <img src="{{portrait}}" alt="{{actor.name}}">
+            {{else}}
+              <div class="placeholder-silhouette"></div>
+            {{/if}}
+            <div class="portrait-overlay"></div>
+          </div>
+          {{> "systems/god-tactical/templates/actor/parts/armor-loadout.hbs"}}
+        </div>
+      </div>
+
+      {{!-- Core stats headline — four numbers: the class's own base Damage (split
+           PHY/MPH, each its own tile — items.mjs's ClassDataModel) plus Fortitude/Dodge
+           (system.defense's Fortitude/Dodge also add the equipped cuirass's passive
+           bonus — see CharacterDataModel.prepareDerivedData). Names across the top,
+           base value under each. Deliberately NOT labelled STRIFE (covered by the
+           rules); Push/Resolve intentionally omitted for now (still subject to change).
+           All four show "—"/0 until a Class is attached. Rendered as a 2x2 grid beside
+           the portrait, matching its height, per request. --}}
+      <div class="core-stats-row">
+        <div class="core-stat" data-tooltip="{{localize 'GOD.DamageNature.Physical'}}">
+          <span class="core-stat-label">{{localize "GOD.Class.DamagePhysical"}}</span>
+          <span class="core-stat-val">{{#if classItem}}{{classItem.baseMelee}}/{{classItem.baseRanged}}{{else}}—{{/if}}</span>
+        </div>
+        <div class="core-stat" data-tooltip="{{localize 'GOD.DamageNature.Metaphysical'}}">
+          <span class="core-stat-label">{{localize "GOD.Class.DamageMetaphysical"}}</span>
+          <span class="core-stat-val">{{#if classItem}}{{classItem.baseMetaphysicalMelee}}/{{classItem.baseMetaphysicalRanged}}{{else}}—{{/if}}</span>
+        </div>
+        <div class="core-stat">
+          <span class="core-stat-label">{{localize "GOD.Class.Fortitude"}}</span>
+          <span class="core-stat-val">{{system.defense.fortitude}}</span>
+        </div>
+        <div class="core-stat">
+          <span class="core-stat-label">{{localize "GOD.Class.Dodge"}}</span>
+          <span class="core-stat-val">{{system.defense.dodge}}</span>
+        </div>
+      </div>
+
+      {{!-- Мезонин — 5 named drives ranked 1–5, plus a shared pool of dice spent to
+           reroll a failed skill check against its characteristic. In edit mode a drive
+           row reorders priority; otherwise it fires a reroll against the actor's most
+           recent eligible failure (see #onMezzanineDriveClick, actor-sheet.mjs). Sits
+           beside the portrait in the topbar's own first row (not the stats strip below),
+           sized to match its height. The dice pool (d10 icons) sits in its own column to
+           the left of the drive list, matched to the list's height — no drawn table/grid,
+           per request. --}}
+      <div class="mezzanine-panel">
+        <div class="mz-panel-head">
+          <span class="mz-panel-title"><i class="fas fa-dice-d20"></i> Мезонин</span>
+        </div>
+        <div class="mz-body">
+          <div class="mz-dice-col" data-tooltip="Кубики Мезонин — тратятся на переброс проваленной проверки по характеристике" data-tooltip-direction="UP">
+            {{#each mezzanine.diceBoxes as |box|}}
+            <span class="mz-dice-box {{#if box.filled}}filled{{/if}}"><i class="fas fa-dice-d10"></i></span>
+            {{/each}}
+            {{#if mezzanine.canRefill}}
+            <button type="button" class="mz-dice-refill" title="Восполнить кубик Мезонин (нарративной механики восполнения пока нет)">+</button>
+            {{/if}}
+          </div>
+          <div class="mz-drive-list">
+            {{#each mezzanine.drives as |d|}}
+            <div class="mz-drive-row" data-drive="{{d.key}}"
+                 data-tooltip="{{#if d.rank}}Приоритет {{d.rank}} — {{d.hint}}{{else}}Приоритет не задан — назначьте в режиме редактирования листа{{/if}}"
+                 data-tooltip-direction="UP">
+              <span class="mz-drive-name">{{d.name}}</span>
+              <span class="mz-drive-rank{{#unless d.rank}} unset{{/unless}}">{{#if d.rank}}{{d.rank}}{{else}}—{{/if}}</span>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-version">
+        {{#if quickConsumables.length}}
+        <div class="quick-consumables">
+          {{#each quickConsumables}}
+          <div class="quick-consumable-icon" data-item-id="{{this.id}}" data-tooltip="{{this.name}} — Запас {{this.stockDice}}/{{this.stockMax}}" data-tooltip-direction="DOWN">
+            <img src="{{this.img}}" alt="{{this.name}}">
+            <span class="quick-consumable-count">{{this.stockDice}}/{{this.stockMax}}</span>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
+      {{!-- Effects/states — laid out as an invisible grid (no drawn frame/lines, just
+           uniform rows/columns instead of a loose wrapping strip) beside XP, per
+           request. --}}
+      <div class="topbar-right">
+        {{> "systems/god-tactical/templates/actor/parts/header-effects.hbs"}}
+        <label class="xp-readout" data-tooltip="Накопленный опыт — списывается при покупке ранга навыка или очка характеристики" data-tooltip-direction="DOWN">
+          <span class="xp-readout-label">XP</span>
+          <input type="number" class="xp-value" name="system.xp.value" value="{{system.xp.value}}" min="0" step="1">
+        </label>
+      </div>
+    </div>
+
+    {{!-- Stats strip — GRIT / Жизни / Урон-Стойкость-Уклонение / Компетенции / Мезонин,
+         packed compactly side by side as part of the header band instead of stacked
+         down the whole left column, per request. Visually merged with .topbar above it
+         (no gap/border between them — see god-tactical.css). --}}
+    <div class="topbar-stats">
+      {{!-- GRIT above Жизни (stacked, not side by side) — see .topbar-stats .flesh-row
+           in god-tactical.css. --}}
+      <div class="flesh-row">
+        {{> "systems/god-tactical/templates/actor/parts/grit-track.hbs"}}
+
+        {{> "systems/god-tactical/templates/actor/parts/wound-track.hbs"}}
+      </div>
+
+      {{!-- Competencies (Компетенции) — free-text tags granted by the attached Class. In
+           edit mode, add/remove writes straight to the attached Class item's own
+           system.competencies (see actor-sheet.mjs's #onPickCompetency/#onRemoveCompetency) —
+           the block itself only needs a class to add against, so it stays visible in
+           edit mode with zero competencies as long as one is attached (nothing to
+           show/edit otherwise). --}}
+      {{#if (or classItem.competencies.length (and editMode classItem))}}
+      <div class="comp-block">
+        <div class="wound-track-head">
+          <span class="wound-track-label"><i class="fas fa-graduation-cap"></i> Компетенции</span>
+        </div>
+        <div class="comp-chip-row">
+          {{#each classItem.competencies as |comp idx|}}
+          <span class="comp-chip">
+            <span class="comp-chip-name">{{comp}}</span>
+            {{#if ../editMode}}
+            <button type="button" class="comp-chip-remove" data-idx="{{idx}}" title="Убрать компетенцию">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            {{/if}}
+          </span>
+          {{/each}}
+        </div>
+        {{#if editMode}}
+        <button type="button" class="comp-add-btn">
+          <i class="fa-solid fa-plus"></i> Добавить компетенцию
+        </button>
+        {{/if}}
+      </div>
+      {{/if}}
+    </div>
+
+    {{!-- Main Grid --}}
+    <div class="main-grid">
+      {{!-- Left Column --}}
+      <div class="left-col">
+        {{!-- Characteristics/skills — always visible (no longer a tab). --}}
+        <div class="chars-stack">
+          {{#each combined as |block|}}
+          <div class="char-block">
+            <div class="char-heading">
+              <div class="name" data-action="roll-char" data-char="{{block.char.key}}" data-value="{{block.char.rollValue}}" data-tooltip="{{block.char.desc}}" data-tooltip-direction="UP">
+                {{block.char.name}}
+              </div>
+              <div class="char-exp">
+                {{#each block.char.expBoxes as |box|}}
+                <div class="char-exp-mark {{#if box.active}}active{{/if}}"
+                     data-char="{{block.char.key}}" data-index="{{box.index}}"
+                     data-tooltip="Опыт" data-tooltip-direction="UP"></div>
+                {{/each}}
+              </div>
+              <div class="char-value"
+                   {{#if block.char.valueTooltip}}data-tooltip="{{block.char.valueTooltip}}" data-tooltip-direction="UP"{{/if}}>
+                <span class="kicker">VAL</span>
+                {{#if block.char.atMax}}
+                <span class="char-max-badge" data-tooltip="Характеристика на максимуме — навыки в этом блоке больше не растут" data-tooltip-direction="UP">MAX</span>
+                {{/if}}
+                <input type="number" class="char-value-num" name="system.chars.{{block.char.key}}" value="{{block.char.rollValue}}" min="{{charMin}}" max="{{charHardMax}}" placeholder="{{charMin}}">
+              </div>
+              {{#if block.char.expMarks}}
+              <div class="char-exp-glow" aria-hidden="true">
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+                <span class="spark"></span>
+              </div>
+              {{/if}}
+            </div>
+
+            <div class="skills-block">
+              <div class="skills-header">
+                <div>Навык</div>
+                <div class="c">Ранг</div>
+                <div class="r">Значение</div>
+              </div>
+              {{#each block.skills as |skill|}}
+              <div class="skill" data-skill="{{skill.key}}">
+                <div class="name" data-action="roll-skill" data-skill="{{skill.key}}" data-value="{{skill.value}}" data-tooltip="{{skill.desc}}" data-tooltip-direction="UP">
+                  {{skill.name}}
+                </div>
+                <div class="skill-rank-marks">
+                  {{#each skill.rankBoxes as |box|}}
+                  <div class="skill-rank-mark {{#if box.active}}filled{{/if}}{{#if box.isBonus}} bonus{{/if}}{{#if box.locked}} locked{{/if}}" data-skill="{{skill.key}}" data-char="{{skill.charKey}}" data-index="{{box.index}}" data-tooltip="{{box.tooltip}}" data-tooltip-direction="UP">
+                    <i class="fas fa-star"></i>
+                  </div>
+                  {{/each}}
+                </div>
+                <div class="skill-value-cell">
+                  <span class="val {{#if (gte skill.value 60)}}hi{{/if}}">{{skill.value}}</span>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      {{!-- Right Column --}}
+      <div class="right-col">
+        {{!-- Horizontal folder-style tabs — replaces the old vertical icon-only rail
+             (tab-rail.hbs, since removed) per request. Buttons keep the shared .tab
+             class + data-tab/data-group so actor-sheet.mjs's existing #onTabClick
+             binding (querySelectorAll(".tab[data-tab]")) picks them up unchanged. --}}
+        <div class="content-tabs" data-group="primary">
+          <button type="button" class="tab content-tab {{#if (eq activeTab 'inventory')}}active{{/if}}" data-tab="inventory" data-group="primary">Инвентарь</button>
+          <button type="button" class="tab content-tab {{#if (eq activeTab 'abilities')}}active{{/if}}" data-tab="abilities" data-group="primary">Способности</button>
+          <button type="button" class="tab content-tab {{#if (eq activeTab 'biography')}}active{{/if}}" data-tab="biography" data-group="primary">Биография</button>
+        </div>
+
+        {{!-- Tab: Inventory --}}
+        <div class="tab-pane {{#if (eq activeTab 'inventory')}}active{{/if}}" data-tab="inventory" data-group="primary">
+          {{#if carryCapacity.hasLimit}}
+          <div class="inv-carry-capacity{{#if carryCapacity.over}} over{{/if}}">
+            <i class="fas fa-boxes-stacked"></i>
+            <span>Грузоподъёмность расы: {{carryCapacity.used}}/{{carryCapacity.max}}</span>
+            {{#if carryCapacity.over}}<span class="inv-carry-capacity-warn"><i class="fas fa-triangle-exclamation"></i> Превышена грузоподъёмность</span>{{/if}}
+          </div>
+          {{/if}}
+          <div class="npc-section-head">
+            <span class="npc-section-title">ИНВЕНТАРЬ</span>
+            <button type="button" class="npc-section-add-btn" title="Добавить предмет"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          {{> "systems/god-tactical/templates/actor/parts/inventory-search-bar.hbs"}}
+          {{#if hasItems}}
+            <div class="inv-groups">
+              <div class="inv-list">
+                {{#each flatItems}}
+                {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+                {{/each}}
+              </div>
+            </div>
+          {{else}}
+          <div class="inv-drop-hint">
+            <i class="fas fa-arrow-down"></i> Перетащите предмет из компендиума
+          </div>
+          {{/if}}
+        </div>
+
+        {{!-- Tab: Abilities --}}
+        <div class="tab-pane {{#if (eq activeTab 'abilities')}}active{{/if}}" data-tab="abilities" data-group="primary">
+          <div class="npc-section-head">
+            <span class="npc-section-title">СПОСОБНОСТИ</span>
+            <button type="button" class="npc-section-add-btn" title="Добавить способность"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          {{> "systems/god-tactical/templates/actor/parts/ability-search-bar.hbs"}}
+          {{#if hasFeatures}}
+            <div class="inv-groups">
+              <div class="inv-list">
+                {{#each flatFeatureItems}}
+                {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+                {{/each}}
+              </div>
+            </div>
+          {{else}}
+          <div class="inv-drop-hint">
+            <i class="fas fa-arrow-down"></i> Перетащите способность из компендиума
+          </div>
+          {{/if}}
+        </div>
+
+        {{!-- Tab: Biography (class & race) --}}
+        <div class="tab-pane {{#if (eq activeTab 'biography')}}active{{/if}}" data-tab="biography" data-group="primary">
+          {{#if hasBioItems}}
+            <div class="inv-groups">
+              <div class="inv-list">
+                {{#each flatBioItems}}
+                {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+                {{/each}}
+              </div>
+            </div>
+          {{else}}
+          <div class="inv-drop-hint">
+            <i class="fas fa-arrow-down"></i> Перетащите класс или расу из компендиума
+          </div>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,135 @@
+<div class="equip-sheet race-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+      </div>
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag">
+          <i class="fas fa-weight-hanging"></i>
+          {{#if isEditing}}
+            <select name="system.weight">{{selectOptions weights selected=system.weight valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{weightLabel}}</span>{{/if}}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <section class="ws-body">
+
+    <!-- Wound Steps / Speed -->
+    <div class="ws-meta-row">
+      <div class="ws-meta">
+        <span class="ws-meta-label"><i class="fas fa-skull"></i> {{localize "GOD.Race.WoundSteps"}}</span>
+        {{#if isEditing}}
+          <input class="ws-meta-input" type="number" name="system.woundSteps" value="{{system.woundSteps}}" min="1">
+        {{else}}
+          <span class="ws-meta-val">{{system.woundSteps}}</span>
+        {{/if}}
+      </div>
+      <div class="ws-meta">
+        <span class="ws-meta-label"><i class="fas fa-person-running"></i> {{localize "GOD.Race.Speed"}}</span>
+        {{#if isEditing}}
+          <input class="ws-meta-input" type="number" name="system.speed" value="{{system.speed}}" min="0">
+        {{else}}
+          <span class="ws-meta-val">{{system.speed}} {{localize "GOD.Race.SpeedUnit"}}</span>
+        {{/if}}
+      </div>
+      <div class="ws-meta">
+        <span class="ws-meta-label"><i class="fas fa-boxes-stacked"></i> {{localize "GOD.Race.Capacity"}}</span>
+        {{#if isEditing}}
+          <input class="ws-meta-input" type="number" name="system.capacity" value="{{system.capacity}}" min="0">
+        {{else}}
+          <span class="ws-meta-val">{{system.capacity}}</span>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Бонусы характеристик — знаковое число на каждую характеристику -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Race.CharBonuses"}}</div>
+      <div class="race-charbonus-grid">
+        {{#each charBonusRows}}
+        <div class="ws-meta">
+          <span class="ws-meta-label">{{this.name}}</span>
+          {{#if ../isEditing}}
+            <input class="ws-meta-input" type="number" name="system.charBonuses.{{this.key}}" value="{{this.value}}" step="1">
+          {{else}}
+            <span class="ws-meta-val">{{this.formatted}}</span>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- Resolve — the one DRAMA triplet (moved here from Class, see ClassDataModel's
+         migrateData doc comment in items.mjs) — fixed row name, no per-race label. -->
+    <div class="cls-group-head">{{localize "GOD.Class.Drama"}}</div>
+
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Class.Resolve"}}</div>
+      <div class="cls-triplet-row">
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Fiasco"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="text" name="system.resolve.fiasco" value="{{system.resolve.fiasco}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.resolve.fiasco}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Fail"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="text" name="system.resolve.fail" value="{{system.resolve.fail}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.resolve.fail}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Success"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="text" name="system.resolve.success" value="{{system.resolve.success}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.resolve.success}}</span>
+          {{/if}}
+        </div>
+        <div class="cls-triplet">
+          <span class="cls-triplet-label">{{localize "GOD.Class.Triumph"}}</span>
+          {{#if isEditing}}
+            <input class="ws-meta-input" type="text" name="system.resolve.triumph" value="{{system.resolve.triumph}}">
+          {{else}}
+            <span class="cls-triplet-val">{{system.resolve.triumph}}</span>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Описание -->
+    <div class="ws-block">
+      <div class="ws-block-head">{{localize "GOD.Race.Description"}}</div>
+      {{#if isEditing}}
+        <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+      {{else}}
+        <div class="ws-prose">
+          {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+        </div>
+      {{/if}}
+    </div>
+
+  </section>
+
+</div>

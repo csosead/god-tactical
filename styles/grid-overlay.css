@@ -1,0 +1,10 @@
+/* ============================================
+   GOD Tactical — UI Styles
+   ============================================ */
+
+/* Remove dark background panel from the sidebar tab strip */
+aside#sidebar {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}

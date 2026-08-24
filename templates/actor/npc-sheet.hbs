@@ -1,0 +1,139 @@
+<div class="god-tactical npc-sheet">
+  {{!-- Header --}}
+  <header class="npc-header">
+    <input type="text" class="npc-name-input" name="name" value="{{actor.name}}"
+           placeholder="{{localize 'GOD.Actor.NPC'}}">
+    {{> "systems/god-tactical/templates/actor/parts/header-effects.hbs"}}
+  </header>
+
+  {{!-- Top: Portrait + compact stats (damage/dodge/fortitude, armor, lives) --}}
+  <div class="npc-top">
+    <div class="npc-portrait-col">
+      <div class="npc-portrait {{#if hasCriticalFlaw}}critical-state{{/if}} {{#if woundTrack.incapacitated}}incapacitated-state{{/if}}" data-edit="img" title="{{actor.name}}">
+        {{#if portrait}}
+          <img src="{{portrait}}" alt="{{actor.name}}">
+        {{else}}
+          <div class="npc-portrait-placeholder"></div>
+        {{/if}}
+        <div class="npc-portrait-overlay"></div>
+        <div class="npc-hierarchy-badge" style="--tier-color: {{hierarchyMeta.color}};"
+             data-tooltip="{{localize hierarchyMeta.labelKey}}" data-tooltip-direction="UP">
+          <i class="fas {{hierarchyMeta.icon}}"></i>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Description textarea moved out for now to make room for the compact stats
+         panel below — see git history / ask before re-adding if this needs to come back.
+    <div class="npc-top-desc">
+      <div class="npc-section-head">
+        <span class="npc-section-title">ОПИСАНИЕ</span>
+      </div>
+      <textarea name="system.biography" placeholder="Описание NPC…">{{biography}}</textarea>
+    </div>
+    --}}
+
+    {{!-- Compact stats panel: damage/dodge/fortitude, armor, lives — all moved up here
+         (out of the Свойства tab) so they're visible without switching tabs. Effects
+         mini-box stays below, outside .npc-top, unaffected. --}}
+    <div class="npc-top-stats">
+      <div class="npc-stat-mini-row">
+        <div class="npc-stat-mini npc-stat-mini-combo">
+          <span class="npc-stat-mini-pair npc-damage-pair" title="Damage">
+            <i class="fas fa-khanda npc-damage-roll" data-action="deal-damage" data-tooltip="Нанести урон (Ближний, физический — по умолчанию; конкретную природу/дальность выбирает кнопка «Атаковать» на карточке оружия/способности)"></i>
+            <span class="npc-damage-grid">
+              <input type="number" name="system.damage.melee" value="{{damage.melee}}" min="0" title="Физический · Ближний (PHY-M)">
+              <input type="number" name="system.damage.ranged" value="{{damage.ranged}}" min="0" title="Физический · Дальний (PHY-R)">
+              <input type="number" name="system.damage.metaphysicalMelee" value="{{damage.metaphysicalMelee}}" min="0" title="Метафизический · Ближний (MPH-M)">
+              <input type="number" name="system.damage.metaphysicalRanged" value="{{damage.metaphysicalRanged}}" min="0" title="Метафизический · Дальний (MPH-R)">
+            </span>
+          </span>
+          <span class="npc-stat-mini-pair" title="Dodge">
+            <i class="fas fa-wind"></i>
+            <input type="number" name="system.dodge.value" value="{{dodge.value}}" min="0">
+          </span>
+          <span class="npc-stat-mini-pair" title="Fortitude">
+            <i class="fas fa-shield-heart"></i>
+            <input type="number" name="system.fortitude.value" value="{{fortitude.value}}" min="0">
+          </span>
+        </div>
+        <div class="npc-stat-mini" data-tooltip="{{localize 'GOD.Npc.Hierarchy'}}">
+          <i class="fas {{hierarchyMeta.icon}}" style="color: {{hierarchyMeta.color}};"></i>
+          <select name="system.hierarchy">{{selectOptions hierarchies selected=system.hierarchy valueAttr="value" labelAttr="label" localize=true}}</select>
+        </div>
+        <div class="npc-stat-mini" data-tooltip="{{localize 'GOD.Npc.Size'}}">
+          <i class="fas fa-ruler-vertical"></i>
+          <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label" localize=true}}</select>
+        </div>
+      </div>
+
+      {{> "systems/god-tactical/templates/actor/parts/grit-track.hbs"}}
+
+      {{> "systems/god-tactical/templates/actor/parts/wound-track.hbs"}}
+    </div>
+  </div>
+
+  {{!-- Tab: Properties (creature card + features — damage/dodge/fortitude, armor, lives
+       all moved up into .npc-top-stats, see above) --}}
+  <div class="tab-pane npc-bio {{#if (eq activeTab 'bio')}}active{{/if}}" data-tab="bio" data-group="primary">
+    {{#if creatureItem}}
+    <div class="npc-creature-card" data-item-id="{{creatureItem.id}}" data-tooltip="ПКМ — меню">
+      <img class="npc-creature-img" src="{{creatureItem.img}}" alt="">
+      <div class="npc-creature-info">
+        <span class="npc-creature-name">{{creatureItem.name}}</span>
+        <div class="inv-card-meta">
+          <span class="inv-meta-chip"><i class="fas fa-box"></i> {{creatureItem.sizeLabel}}</span>
+          <span class="inv-meta-chip"><i class="fas fa-weight-hanging"></i> {{creatureItem.weightLabel}}</span>
+          <span class="inv-meta-chip"><i class="fas fa-skull"></i> Жизней: {{creatureItem.woundSteps}}</span>
+          <span class="inv-meta-chip"><i class="fas fa-person-running"></i> {{creatureItem.speed}} {{localize "GOD.Race.SpeedUnit"}}</span>
+        </div>
+      </div>
+    </div>
+    {{else}}
+    <div class="inv-drop-hint">
+      <i class="fas fa-arrow-down"></i> Перетащите карточку существа или расы из компендиума
+    </div>
+    {{/if}}
+
+    <div class="npc-section-head">
+      <span class="npc-section-title">СПОСОБНОСТИ</span>
+      <button type="button" class="npc-section-add-btn" title="Добавить способность"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    {{#if hasFeatures}}
+      <div class="inv-groups">
+        <div class="inv-list">
+          {{#each flatFeatures}}
+          {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+          {{/each}}
+        </div>
+      </div>
+    {{else}}
+    <div class="inv-drop-hint">
+      <i class="fas fa-arrow-down"></i> Перетащите способность из компендиума
+    </div>
+    {{/if}}
+  </div>
+
+  {{!-- Tab: Inventory --}}
+  <div class="tab-pane npc-anketa-pane {{#if (eq activeTab 'anketa')}}active{{/if}}" data-tab="anketa" data-group="primary">
+    <div class="npc-items">
+      <div class="npc-section-head">
+        <span class="npc-section-title">СНАРЯЖЕНИЕ</span>
+        <button type="button" class="npc-section-add-btn" title="Добавить предмет"><i class="fa-solid fa-plus"></i></button>
+      </div>
+    {{#if hasItems}}
+      <div class="inv-groups">
+        <div class="inv-list">
+          {{#each flatItems}}
+          {{> "systems/god-tactical/templates/item/parts/weapon-inventory-row.hbs"}}
+          {{/each}}
+        </div>
+      </div>
+    {{else}}
+    <div class="inv-drop-hint">
+      <i class="fas fa-arrow-down"></i> Перетащите сюда
+    </div>
+    {{/if}}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+{
+  "name": "Длинное копьё",
+  "type": "weapon",
+  "img": "systems/god-tactical/packs/icons/weapons/Длинное копье.png",
+  "system": {
+    "hands": "two",
+    "size": "large",
+    "natisk": [
+      {
+        "rangeModifier": 9,
+        "templateShape": "line",
+        "templateSize": 1
+      }
+    ],
+    "damageType": "piercing",
+    "property": "",
+    "rarity": "veryCommon",
+    "description": "",
+    "brosok": [],
+    "skill": "impulse"
+  },
+  "_id": "Wz7JsX6QiXekrYVB",
+  "effects": [],
+  "folder": "bWH59KYRSvUqHexY",
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783358247747,
+    "modifiedTime": 1783600416956,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!Wz7JsX6QiXekrYVB"
+}

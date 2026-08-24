@@ -1,0 +1,97 @@
+<div class="equip-sheet trophy-sheet">
+
+  <!-- HEADER -->
+  <header class="ws-header">
+    <img class="ws-img" src="{{item.img}}" data-edit="img" title="{{item.name}}">
+    <div class="ws-header-info">
+
+      <div class="ws-name-row">
+        {{#if isEditing}}
+          <input class="ws-name-input" type="text" name="name" value="{{item.name}}">
+        {{else}}
+          <h1 class="ws-name">{{item.name}}</h1>
+        {{/if}}
+        <div class="ws-rarity">
+          <div class="rarity-value" data-tooltip="{{rarityTierName}}" data-tooltip-direction="UP">
+            {{#if isEditing}}
+              <input type="number" class="rarity-number-input" name="system.rarity" value="{{rarityValue}}" min="0" max="{{rarityMax}}" step="1">
+            {{else}}
+              <span class="rarity-number">{{rarityValue}}</span>
+            {{/if}}
+            <i class="fas fa-gem rarity-gem"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="ws-tags">
+        <span class="ws-tag">
+          <i class="fas fa-box"></i>
+          {{#if isEditing}}
+            <select name="system.size">{{selectOptions sizes selected=system.size valueAttr="value" labelAttr="label"}}</select>
+          {{else}}<span>{{sizeLabel}}</span>{{/if}}
+        </span>
+        <span class="ws-tag" data-tooltip="{{localize 'GOD.Item.Trophy.Category'}}">
+          <i class="fas fa-layer-group"></i>
+          {{#if isEditing}}
+            <select name="system.category">{{selectOptions categories selected=system.category valueAttr="value" labelAttr="label" localize=true}}</select>
+          {{else}}<span>{{categoryLabel}}</span>{{/if}}
+        </span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <section class="ws-body">
+    <div class="ws-pane active" data-tab="description">
+
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Item.Description"}}</div>
+        {{#if isEditing}}
+          <textarea class="ws-textarea" name="system.description">{{system.description}}</textarea>
+        {{else}}
+          <div class="ws-prose">
+            {{#if system.description}}{{{system.description}}}{{else}}<span class="ws-empty">—</span>{{/if}}
+          </div>
+        {{/if}}
+      </div>
+
+      <div class="ws-block">
+        <div class="ws-block-head">{{localize "GOD.Item.Trophy.Features"}}</div>
+        {{#if isEditing}}
+          <div class="ws-feature-list">
+            {{#each features as |entry|}}
+            <div class="ws-feature-row">
+              <textarea class="ws-textarea" name="system.features.{{entry.index}}.text">{{entry.text}}</textarea>
+              <div class="ws-feature-row-foot">
+                <select class="ws-meta-sel" name="system.features.{{entry.index}}.activation">
+                  {{selectOptions ../activationOptions selected=entry.activation valueAttr="value" labelAttr="label" localize=true}}
+                </select>
+                <button type="button" class="ws-feature-remove" data-idx="{{entry.index}}" title="{{localize 'GOD.Weapon.RemoveRange'}}">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          <button type="button" class="ws-feature-add">
+            <i class="fa-solid fa-plus"></i> {{localize "GOD.Item.AddFeature"}}
+          </button>
+        {{else}}
+          <div class="ws-feature-list-view">
+            {{#each features as |entry|}}
+            <div class="ws-feature-view-row">
+              {{#if entry.activationLabel}}<span class="ws-tag ws-feature-activation-tag">{{entry.activationLabel}}</span>{{/if}}
+              <div class="ws-prose">{{{entry.text}}}</div>
+            </div>
+            {{else}}
+            <span class="ws-empty">—</span>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+
+    </div>
+  </section>
+
+</div>

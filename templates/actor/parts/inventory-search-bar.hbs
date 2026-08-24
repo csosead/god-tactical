@@ -1,0 +1,18 @@
+{{!-- Inventory search — character sheet only (NPC sheet never had a filter/search bar
+     at all; its lists are short enough not to need one). Replaces the old type/rarity
+     chip filter bar (module/sheets/item-filter.mjs's bindInventoryFilter, removed): that
+     one hid a card whenever ITS OWN top-level type/rarity didn't match every active
+     chip, which broke as soon as an item was packed into a container — the container's
+     own card (type "container") never matched a "Броня"/"Оружие" chip, so hiding it also
+     hid everything packed inside, regardless of whether that matched. Free-text search
+     sidesteps this: module/sheets/item-search.mjs matches each card against its OWN
+     rendered text only, and separately keeps a container visible (auto-expanding it just
+     enough to reveal the match, without touching the user's own manual expand/collapse
+     state) whenever any of its contents still match. --}}
+{{#if hasItems}}
+<div class="inv-search-bar">
+  <i class="fas fa-magnifying-glass"></i>
+  <input type="text" class="inv-search-input" placeholder="Поиск по инвентарю…" autocomplete="off">
+  <button type="button" class="inv-search-clear" title="Очистить"><i class="fas fa-xmark"></i></button>
+</div>
+{{/if}}

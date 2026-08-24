@@ -1,0 +1,8 @@
+2026/08/23-17:41:42.394 bd34 Recovering log #940
+2026/08/23-17:41:42.398 bd34 Delete type=0 #940
+2026/08/23-17:41:42.398 bd34 Delete type=3 #939
+2026/08/23-18:21:41.767 6ad4 Level-0 table #944: started
+2026/08/23-18:21:41.767 6ad4 Level-0 table #944: 0 bytes OK
+2026/08/23-18:21:41.768 6ad4 Delete type=0 #942
+2026/08/23-18:21:41.771 6ad4 Manual compaction at level-0 from '!actors!0IRcrJHMKPj7c0l9' @ 72057594037927935 : 1 .. '!folders!BA8oJvUrvz2I2Lxh' @ 0 : 0; will stop at (end)
+2026/08/23-18:21:41.771 6ad4 Manual compaction at level-1 from '!actors!0IRcrJHMKPj7c0l9' @ 72057594037927935 : 1 .. '!folders!BA8oJvUrvz2I2Lxh' @ 0 : 0; will stop at (end)

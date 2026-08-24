@@ -1,0 +1,38 @@
+{
+  "folder": "O1srRS084Wa7KMBN",
+  "name": "Крепкая шкура",
+  "type": "armor",
+  "_id": "Pp81su6x3k4wo8bW",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+    "description": "",
+    "archetype": "heavy",
+    "subtype": "cuirass",
+    "drawbackName": "",
+    "drawbackText": "",
+    "vulnerability1": "piercing",
+    "vulnerability2": "cutting",
+    "rarity": "rare",
+    "equipped": false,
+    "armorCells": 8
+  },
+  "effects": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "PYCF81VHz7oAC5cE": 3
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "god-tactical",
+    "systemVersion": "0.1.2",
+    "createdTime": 1783877317609,
+    "modifiedTime": 1783878073827,
+    "lastModifiedBy": "PYCF81VHz7oAC5cE"
+  },
+  "_key": "!items!Pp81su6x3k4wo8bW"
+}
