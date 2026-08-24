@@ -7,7 +7,7 @@ import { GOD, formatMeters, cellsToMeters, playSound, shakeElement, sparkRepair,
 import { skillRankCharPrereq, skillRankRaiseCost, maxRankForChar } from "../data-models.mjs";
 import { GODRollDialog, applyMezzanine } from "../rolls/roll-dialog.mjs";
 import { checkConsumable } from "../rolls/consumable-check.mjs";
-import { computeWoundState, woundBoxTitle, getGritCells } from "../combat/wounds.mjs";
+import { computeWoundState, getGritCells } from "../combat/wounds.mjs";
 import { bindInventoryReorder, REORDER_MIME } from "./item-reorder.mjs";
 import { bindInventoryContextMenu, bindContextMenu, bindContextMenuOnElement, fakeItemEvent, showPopupMenu } from "./item-context-menu.mjs";
 import { bindInventorySearch, bindAbilitySearch } from "./item-search.mjs";
@@ -498,15 +498,10 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
     const state = computeWoundState(this.document);
     if (!state) return { hasTrack: false };
 
-    const boxes = state.boxes.map((b) => ({
-      index: b.index, filled: b.filled,
-      title: woundBoxTitle(b),
-    }));
-
     return {
       hasTrack: true,
       max: state.max,
-      boxes,
+      current: state.current,
       incapacitated: state.incapacitated,
       badgeLabel: state.incapacitated ? "НЕДЕЕСПОСОБЕН" : "",
     };
@@ -884,10 +879,10 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
       mark.addEventListener("click", this.#onCharExpClick.bind(this));
     });
 
-    // Wound step mark clicks
-    this.element.querySelectorAll(".wound-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onWoundMarkClick.bind(this));
-    });
+    // Жизни counter: LMB on the whole-value takes one wound, RMB restores one — see
+    // #onWoundLoseClick/#onWoundRestoreClick.
+    this.element.querySelector(".wound-counter-value")?.addEventListener("click", this.#onWoundLoseClick.bind(this));
+    this.element.querySelector(".wound-counter-value")?.addEventListener("contextmenu", this.#onWoundRestoreClick.bind(this));
 
     // Incapacitated glow lives on .grit-track, not .wound-track (see #syncIncapacitatedGlow) —
     // this template only sets .grit-track's own state via gritTrack, so it's synced in JS.
@@ -1420,28 +1415,20 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
 
   /* -------------------------------------------- */
 
-  /**
-   * Wound steps track: hearts are lit right→left as wounds land. Clicking an unlit
-   * heart extinguishes every heart between the current edge and the clicked one (a
-   * single hit whose "отрыв" was large enough to jump several steps at once). Clicking
-   * an already-marked heart relights the stack back down to before it (undo).
-   */
-  async #onWoundMarkClick(event) {
+  /** LMB on the Жизни whole-value: takes one wound (push "hit" onto system.wounds),
+   *  clamped at the species' own woundSteps. Posts the incapacitation chat card once
+   *  the ladder fills — same trigger the old per-heart click had, just off a plain
+   *  push instead of an index jump (2026-08-24, numeric-counter redesign — mirrors
+   *  GRIT's own #onGritWholeClick, but Жизни has no "burn" concept, see wounds.mjs's
+   *  computeWoundState doc comment). */
+  async #onWoundLoseClick(event) {
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
     const raceItem = this.document.items.find((it) => it.type === "race");
     const max = raceItem?.system.woundSteps ?? 1;
-    const j = max - 1 - index;
     const wounds = foundry.utils.deepClone(this.document.system.wounds ?? []);
+    if (wounds.length >= max) return;
 
-    if (j < wounds.length) {
-      wounds.length = j;
-      await this.document.update({ "system.wounds": wounds }, { render: false });
-      await this.#patchWoundTrack();
-      return;
-    }
-
-    while (wounds.length <= j) wounds.push("hit");
+    wounds.push("hit");
     await this.document.update({ "system.wounds": wounds }, { render: false });
     await this.#patchWoundTrack();
 
@@ -1458,6 +1445,19 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
         style: CONST.CHAT_MESSAGE_STYLES.EMOTE,
       });
     }
+  }
+
+  /** RMB on the Жизни whole-value: restores one wound (pop the last entry off
+   *  system.wounds). */
+  async #onWoundRestoreClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const wounds = foundry.utils.deepClone(this.document.system.wounds ?? []);
+    if (!wounds.length) return;
+
+    wounds.pop();
+    await this.document.update({ "system.wounds": wounds }, { render: false });
+    await this.#patchWoundTrack();
   }
 
   /* -------------------------------------------- */
@@ -1670,8 +1670,9 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
     this.element.querySelector(".grit-track")?.classList.toggle("incapacitated", !!incapacitated);
   }
 
-  /** Re-render just the "Жизни" (wound/lives) block after a wound-mark click, instead
-   *  of the whole sheet (see the render:false call in #onWoundMarkClick) — a full
+  /** Re-render just the "Жизни" (wound/lives) block after a lose/restore click, instead
+   *  of the whole sheet (see the render:false calls in #onWoundLoseClick/
+   *  #onWoundRestoreClick) — a full
    *  document.update-triggered re-render was resetting the sheet's scroll position.
    *  Also keeps the portrait's own incapacitated-state class, and .grit-track's own
    *  incapacitated glow (see #syncIncapacitatedGlow), in sync — both are driven by
@@ -1702,9 +1703,8 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
       this.element.querySelector(".flesh-row")?.insertAdjacentHTML("beforeend", html);
     }
 
-    this.element.querySelectorAll(".wound-track .wound-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onWoundMarkClick.bind(this));
-    });
+    this.element.querySelector(".wound-track .wound-counter-value")?.addEventListener("click", this.#onWoundLoseClick.bind(this));
+    this.element.querySelector(".wound-track .wound-counter-value")?.addEventListener("contextmenu", this.#onWoundRestoreClick.bind(this));
     this.element.querySelector(".wound-track .wound-max-add")?.addEventListener("click", this.#onWoundMaxAddClick.bind(this));
     this.element.querySelector(".wound-track .wound-max-sub")?.addEventListener("click", this.#onWoundMaxSubtractClick.bind(this));
   }

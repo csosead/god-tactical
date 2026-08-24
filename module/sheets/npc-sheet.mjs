@@ -6,7 +6,7 @@
 import { GOD, formatMeters, cellsToMeters, playSound, shakeElement, sparkRepair } from "../config.mjs";
 import { GODRollDialog } from "../rolls/roll-dialog.mjs";
 import { dealNpcDamage } from "../rolls/npc-attack.mjs";
-import { computeWoundState, woundBoxTitle, getGritCells } from "../combat/wounds.mjs";
+import { computeWoundState, getGritCells } from "../combat/wounds.mjs";
 import { bindInventoryReorder, REORDER_MIME } from "./item-reorder.mjs";
 import { bindInventoryContextMenu, bindContextMenu, bindContextMenuOnElement, fakeItemEvent } from "./item-context-menu.mjs";
 import { clampRarity } from "./rarity-pips.mjs";
@@ -391,15 +391,10 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
     const state = computeWoundState(this.document);
     if (!state) return { hasTrack: false };
 
-    const boxes = state.boxes.map((b) => ({
-      index: b.index, filled: b.filled,
-      title: woundBoxTitle(b),
-    }));
-
     return {
       hasTrack: true,
       max: state.max,
-      boxes,
+      current: state.current,
       incapacitated: state.incapacitated,
       badgeLabel: state.incapacitated ? "НЕДЕЕСПОСОБЕН" : "",
     };
@@ -570,10 +565,10 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
       box.addEventListener("click", this.#onFlawClick.bind(this));
     });
 
-    // Wound step mark clicks
-    this.element.querySelectorAll(".wound-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onWoundMarkClick.bind(this));
-    });
+    // Жизни counter: LMB on the whole-value takes one wound, RMB restores one — see
+    // #onWoundLoseClick/#onWoundRestoreClick.
+    this.element.querySelector(".wound-counter-value")?.addEventListener("click", this.#onWoundLoseClick.bind(this));
+    this.element.querySelector(".wound-counter-value")?.addEventListener("contextmenu", this.#onWoundRestoreClick.bind(this));
 
     // Incapacitated glow lives on .grit-track, not .wound-track — see #syncIncapacitatedGlow.
     this.#syncIncapacitatedGlow(!!context.woundTrack?.incapacitated);
@@ -1185,7 +1180,7 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
     this.element.querySelector(".grit-track")?.classList.toggle("incapacitated", !!incapacitated);
   }
 
-  /** Re-render just the "Жизни" (wound/lives) block after a wound-mark click, instead
+  /** Re-render just the "Жизни" (wound/lives) block after a lose/restore click, instead
    *  of the whole sheet — see actor-sheet.mjs's identical method for the full rationale.
    *  Also keeps .grit-track's own incapacitated glow (see #syncIncapacitatedGlow) in
    *  sync, since it's driven by woundTrack.incapacitated but lives outside this block. */
@@ -1213,15 +1208,14 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
       anchor?.insertAdjacentHTML("afterend", html);
     }
 
-    this.element.querySelectorAll(".wound-track .wound-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onWoundMarkClick.bind(this));
-    });
+    this.element.querySelector(".wound-track .wound-counter-value")?.addEventListener("click", this.#onWoundLoseClick.bind(this));
+    this.element.querySelector(".wound-track .wound-counter-value")?.addEventListener("contextmenu", this.#onWoundRestoreClick.bind(this));
     this.element.querySelector(".wound-track .wound-max-add")?.addEventListener("click", this.#onWoundMaxAddClick.bind(this));
     this.element.querySelector(".wound-track .wound-max-sub")?.addEventListener("click", this.#onWoundMaxSubtractClick.bind(this));
   }
 
   /** Edit-mode "+" on the Жизни block: raises the attached species item's (Creature or
-   *  Race — see #onWoundMarkClick's own lookup) woundSteps by one. No-op with nothing
+   *  Race — see #onWoundLoseClick's own lookup) woundSteps by one. No-op with nothing
    *  attached — the block isn't rendered then either, see wound-track.hbs's hasTrack-
    *  only guard. */
   async #onWoundMaxAddClick(event) {
@@ -1246,25 +1240,16 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
 
   /* -------------------------------------------- */
 
-  /** Same click semantics as the character sheet's wound track: hearts are lit right→left
-   *  as wounds land. Clicking an unlit heart extinguishes every heart between the current
-   *  edge and the clicked one; clicking an already-marked heart relights back to before it. */
-  async #onWoundMarkClick(event) {
+  /** LMB on the Жизни whole-value: takes one wound — see actor-sheet.mjs's identical
+   *  method for the full rationale. */
+  async #onWoundLoseClick(event) {
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
     const creatureItem = this.document.items.find((it) => it.type === "creature" || it.type === "race");
     const max = creatureItem?.system.woundSteps ?? 1;
-    const j = max - 1 - index;
     const wounds = foundry.utils.deepClone(this.document.system.wounds ?? []);
+    if (wounds.length >= max) return;
 
-    if (j < wounds.length) {
-      wounds.length = j;
-      await this.document.update({ "system.wounds": wounds }, { render: false });
-      await this.#patchWoundTrack();
-      return;
-    }
-
-    while (wounds.length <= j) wounds.push("hit");
+    wounds.push("hit");
     await this.document.update({ "system.wounds": wounds }, { render: false });
     await this.#patchWoundTrack();
 
@@ -1281,6 +1266,18 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
         style: CONST.CHAT_MESSAGE_STYLES.EMOTE,
       });
     }
+  }
+
+  /** RMB on the Жизни whole-value: restores one wound. */
+  async #onWoundRestoreClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const wounds = foundry.utils.deepClone(this.document.system.wounds ?? []);
+    if (!wounds.length) return;
+
+    wounds.pop();
+    await this.document.update({ "system.wounds": wounds }, { render: false });
+    await this.#patchWoundTrack();
   }
 
   /* -------------------------------------------- */

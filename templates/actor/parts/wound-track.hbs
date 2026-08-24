@@ -1,7 +1,13 @@
 {{!-- Wound/lives track (Жизни) — shared by the Character and NPC sheets, rendered
-     standalone by #patchWoundTrack() (actor-sheet.mjs/npc-sheet.mjs) so a wound-mark
-     click can patch just this block instead of re-rendering the whole sheet (which was
-     resetting the sheet's scroll position — see #onWoundMarkClick).
+     standalone by #patchWoundTrack() (actor-sheet.mjs/npc-sheet.mjs) so a lose/restore
+     click can patch just this block instead of re-rendering the whole sheet.
+
+     Numeric counter, no text label (2026-08-24 — mirrors GRIT's own redesign; the heart
+     icon alone stands in for the old "Жизни" caption, see its own data-tooltip below).
+     LMB on the whole-value takes one wound, RMB restores one — no "burn"/permanent-max
+     concept here, unlike GRIT's max field (per user: "сжигания сердец у меня нет"), so
+     the max stays a plain number, only adjustable via the edit-mode "+"/"-" below. See
+     #onWoundLoseClick/#onWoundRestoreClick in actor-sheet.mjs/npc-sheet.mjs.
 
      Guard stays hasTrack-only (unlike grit-track.hbs's own edit-mode guard) — hasTrack
      is false only when there's no species (Race/Creature) item attached at all, and the
@@ -10,15 +16,12 @@
      schema min, items.mjs) — a species always has at least one life. --}}
 {{#if woundTrack.hasTrack}}
 <div class="wound-track">
-  <div class="wound-track-head">
-    <span class="wound-track-label">Жизни</span>
+  <div class="wound-counter-row">
+    <i class="life-icon-badge" data-tooltip="Жизни" data-tooltip-direction="UP"></i>
+    <span class="wound-counter-value" data-tooltip="ЛКМ — потерять жизнь, ПКМ — восстановить" data-tooltip-direction="UP">{{woundTrack.current}}</span>
+    <span class="wound-counter-sep">/</span>
+    <span class="wound-counter-max">{{woundTrack.max}}</span>
     {{#if woundTrack.badgeLabel}}<span class="wound-track-state">{{woundTrack.badgeLabel}}</span>{{/if}}
-  </div>
-  <div class="wound-marks">
-    {{#each woundTrack.boxes as |box|}}
-    <div class="wound-mark {{#if box.filled}}filled{{/if}}"
-         data-index="{{box.index}}" data-tooltip="{{box.title}}" data-tooltip-direction="UP"></div>
-    {{/each}}
     {{#if editMode}}
     <button type="button" class="wound-max-sub" title="Уменьшить максимум Жизней на 1">
       <i class="fa-solid fa-minus"></i>

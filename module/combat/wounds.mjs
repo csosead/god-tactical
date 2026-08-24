@@ -10,14 +10,14 @@
  * a separate block.
  */
 
-/** Hover tooltip for a wound-step box. */
-export function woundBoxTitle(box) {
-  return box.filled ? "Жизнь потеряна" : "Жив";
-}
-
 /**
  * Full wound state for an actor, or null if it has no species card (Race/Creature).
- *  - boxes: [{ index, filled }]
+ * Rendered as a numeric counter (2026-08-24 — replaced the old one-heart-per-step row,
+ * mirroring GRIT's own numeric-counter redesign; unlike GRIT, Жизни has no "burn"
+ * concept — per user, "сжигания сердец у меня нет" — so there's nothing analogous to
+ * GRIT's effectiveMax here, just a plain current/max).
+ *  - max:   total wound steps (the species item's own woundSteps)
+ *  - current: lives left = max - wounds.length ("жив" count a player reads directly)
  *  - incapacitated: ladder full (all hearts spent — the actor is dead/down)
  */
 export function computeWoundState(actor) {
@@ -27,16 +27,9 @@ export function computeWoundState(actor) {
   const max = Math.max(1, speciesItem.system.woundSteps ?? 1);
   const wounds = actor.system.wounds ?? [];
 
-  const boxes = [];
-  for (let i = 0; i < max; i++) {
-    // Wounds fill right→left — the rightmost `wounds.length` cells are marked.
-    const filled = i >= max - wounds.length;
-    boxes.push({ index: i, filled });
-  }
-
   return {
     max,
-    boxes,
+    current: Math.max(0, max - wounds.length),
     incapacitated: wounds.length >= max,
   };
 }

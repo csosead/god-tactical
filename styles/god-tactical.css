@@ -1317,6 +1317,33 @@
   padding: 10px 10px 8px;
 }
 
+/* .wound-track-head/.wound-track-label were originally a header shared by GRIT/Жизни/
+ * Компетенции alike; both GRIT and Жизни moved to their own numeric-counter markup
+ * (2026-08-24, see .grit-counter-row/.wound-counter-row) and no longer reference these
+ * classes — Компетенции is the only remaining consumer, character-sheet.hbs's own
+ * ".topbar-stats .comp-block .wound-track-head". Kept here, un-renamed, to avoid
+ * touching character-sheet.hbs's markup for a purely cosmetic label the user never
+ * asked to change. */
+.god-tactical .wound-track-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.god-tactical .wound-track-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+/* Label icon removed — Компетенции's own heading reads as plain text now, same as GRIT/
+ * Жизни did before their icons moved onto the numeric-counter markup instead. */
+.god-tactical .wound-track-label i { display: none; }
+
 .god-tactical .comp-block .wound-track-head {
   /* Left-aligned instead of the generic .wound-track-head's centered title — comp-block
    * is a wide, flex-grown block (see .topbar-stats .comp-block) and the chip row below
@@ -1403,32 +1430,65 @@
  * GRIT readout next to it. See .portrait.incapacitated-state below, which
  * carries the red glow now. */
 
-.god-tactical .wound-track-head {
+/* Numeric Жизни counter (2026-08-24 — mirrors GRIT's own redesign: replaced the old
+ * one-heart-per-step row with a fixed-footprint "current / max", no text label, full-
+ * size icon on the left). No "burn" concept here (unlike GRIT's max field) — per user,
+ * "сжигания сердец у меня нет" — so the max stays a plain number, edit-mode-only via
+ * the dashed "+"/"-" further down. See actor-sheet.mjs's/npc-sheet.mjs's
+ * #onWoundLoseClick/#onWoundRestoreClick. */
+.god-tactical .wound-counter-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-bottom: 8px;
+  gap: 8px;
 }
 
-.god-tactical .wound-track-label {
-  font-family: var(--sans);
+/* Painted heart glyph — full-size icon to the left of the counter, own colors, not
+ * tinted via currentColor (assets/images/life-heart.png). */
+.god-tactical .life-icon-badge {
+  display: block;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  background-image: url("../assets/images/life-heart.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.god-tactical .wound-counter-value,
+.god-tactical .wound-counter-max {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+.god-tactical .wound-counter-value:hover,
+.god-tactical .wound-counter-max:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.god-tactical .wound-counter-value {
+  min-width: 1.4em;
+  padding: 1px 3px;
+  font-size: 22px;
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink);
+  text-align: center;
+  color: #c81e2b;
 }
-/* Label icon removed — "GRIT"/"ЖИЗНИ"/"КОМПЕТЕНЦИИ" read as plain text now; the
- * crimson it used to carry lives on directly on .wound-mark/.grit-mark.state-cracked. */
-.god-tactical .wound-track-label i { display: none; }
+.god-tactical .wound-counter-sep {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.god-tactical .wound-counter-max {
+  padding: 1px 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-3);
+}
 
-/* Positioned out of flow so it never pulls the centered label off-center */
+/* "НЕДЕЕСПОСОБЕН" badge — a normal flex item in .wound-counter-row now (no longer
+ * absolutely positioned; that only made sense against the old centered-label header,
+ * which this row replaced). */
 .god-tactical .wound-track-state {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
@@ -1438,57 +1498,16 @@
   text-shadow: 0 0 6px rgba(224,64,64,0.7);
 }
 
-.god-tactical .wound-marks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-/* Heart glyph (2026-08-24 — swapped the Unicode ❤ text glyph for a painted PNG,
- * assets/images/life-heart.png, matching GRIT's own mask-icon treatment; shared by
- * both the Character and NPC sheets). Sized in `em` on the ::before rather than fixed
- * pixels, so it stays in lockstep with .wound-mark's own font-size — the smaller
- * .npc-top-stats variant further down only needs to override font-size, not this rule
- * too. */
-.god-tactical .wound-mark {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  opacity: 1;
-  transition: opacity 0.15s, filter 0.15s;
-}
-.god-tactical .wound-mark::before {
-  content: "";
-  display: block;
-  width: 1em;
-  height: 1em;
-  background-image: url("../assets/images/life-heart.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-.god-tactical .wound-mark:hover { opacity: 0.85; }
-
-/* Filled = wound taken, extinguished — dim + desaturate (same idiom as GRIT's spent
- * cells). */
-.god-tactical .wound-mark.filled {
-  opacity: 0.32;
-  filter: grayscale(1);
-}
-
 /* Edit-mode-only "+"/"-" pair at the end of a GRIT/Жизни row (grit-track.hbs/wound-
  * track.hbs) — raise/lower that track's own RAW pool by one (system.baseGrit/gritMax,
  * or the attached species item's woundSteps — see actor-sheet.mjs's/npc-sheet.mjs's
  * #onGritMaxAddClick/#onGritMaxSubtractClick/#onWoundMaxAddClick/#onWoundMaxSubtractClick).
  * Deliberately edit-mode only — resizing the pool itself is a character-build decision,
  * not a play-time action (2026-08-24, reinstated after a brief always-live LMB/RMB
- * detour on .grit-counter-max, per user feedback). Same 24×24 footprint as .grit-mark/
- * .wound-mark so they sit inline with them, but a dashed outline instead of a filled
- * glyph — reads as "adjust the slot count", not as a state of an existing one. */
+ * detour on .grit-counter-max, per user feedback). Same 24×24 footprint as the
+ * counters' other elements so they sit inline with them, but a dashed outline instead
+ * of a filled glyph — reads as "adjust the slot count", not as a state of an existing
+ * one. */
 .god-tactical .grit-max-add,
 .god-tactical .grit-max-sub,
 .god-tactical .wound-max-add,
@@ -1651,7 +1670,7 @@
 
 /* Struck-through — clicked "broken", purely visual (see ArmorDataModel's `broken`
  * field; no mechanical effect). No text left to strike through, so a diagonal bar
- * stands in for it — same crimson idiom as .wound-mark/.grit-mark's own "damage" cues. */
+ * stands in for it — same crimson idiom as GRIT's own "burned" cues. */
 .god-tactical .armor-loadout-piece.state-broken {
   background: rgba(224, 64, 64, 0.12);
 }
@@ -3915,29 +3934,21 @@
 .god-tactical .npc-top-stats .wound-track {
   padding: 4px 6px;
 }
-.god-tactical .npc-top-stats .wound-track-head { margin-bottom: 3px; }
-.god-tactical .npc-top-stats .wound-track-label {
-  font-size: 9px;
-  letter-spacing: 0.06em;
-}
-.god-tactical .npc-top-stats .wound-track-label i { margin-right: 3px; }
 .god-tactical .npc-top-stats .wound-track-state { font-size: 9px; }
-.god-tactical .npc-top-stats .wound-marks { gap: 3px; }
-.god-tactical .npc-top-stats .wound-mark {
-  width: 14px;
-  height: 14px;
-  font-size: 11px;
-}
-.god-tactical .npc-top-stats .grit-icon-badge {
+.god-tactical .npc-top-stats .grit-icon-badge,
+.god-tactical .npc-top-stats .life-icon-badge {
   width: 20px;
   height: 20px;
 }
-.god-tactical .npc-top-stats .grit-counter-value {
+.god-tactical .npc-top-stats .grit-counter-value,
+.god-tactical .npc-top-stats .wound-counter-value {
   font-size: 13px;
   min-width: 1.2em;
 }
 .god-tactical .npc-top-stats .grit-counter-sep,
-.god-tactical .npc-top-stats .grit-counter-max {
+.god-tactical .npc-top-stats .grit-counter-max,
+.god-tactical .npc-top-stats .wound-counter-sep,
+.god-tactical .npc-top-stats .wound-counter-max {
   font-size: 10px;
 }
 .god-tactical .npc-top-stats .grit-max-add,
