@@ -86,6 +86,7 @@ Hooks.once("init", function () {
   ]);
 
   registerSeedRegistrySetting();
+  registerGritBaseV9Setting();
   registerTooltipToggle();
 
   // Register Handlebars helpers
@@ -472,6 +473,49 @@ async function migratePerkToAbility() {
   }
 }
 
+const GRIT_BASE_V9_SETTING = "gritBaseV9Applied";
+
+/** Registered in the init hook, alongside registerSeedRegistrySetting — a one-shot
+ *  gate for migrateGritBaseTo9 below. */
+function registerGritBaseV9Setting() {
+  game.settings.register("god-tactical", GRIT_BASE_V9_SETTING, {
+    scope: "world",
+    config: false,
+    type: Boolean,
+    default: false,
+  });
+}
+
+/**
+ * One-time bump of existing Character actors' baseGrit from the old default (5) to the
+ * new one (9) — GOD.BASE_GRIT itself (config.mjs) only sets the initial value for
+ * NEWLY created actors; anyone made before this change already has 5 persisted in their
+ * own data and needs an explicit update. Deliberately NOT done as an in-place value
+ * transform inside CharacterDataModel.migrateData (see the "RETIRED" comment on
+ * data-models.mjs's old rankSystemVersion shift for why): migrateData also runs on
+ * SPARSE update payloads (e.g. a single click on the GRIT "+"/"-" stepper), so a
+ * `baseGrit === 5` check there would keep re-firing forever and silently overwrite a
+ * GM's own deliberate choice to set some character's baseGrit back to 5 later. Gated
+ * instead by a real one-shot world setting (same idiom as seed-compendiums.mjs's
+ * seedRegistry) so it runs exactly once, ever, regardless of how many times any
+ * individual actor's baseGrit changes after today. Only touches game.actors (linked
+ * characters) — an unlinked token's own ActorDelta override, if any GM has one, isn't
+ * covered and would need a manual fix; low-risk enough to skip the extra scan
+ * migratePerkToAbility does for that case.
+ */
+async function migrateGritBaseTo9() {
+  if (game.settings.get("god-tactical", GRIT_BASE_V9_SETTING)) return;
+
+  const updates = game.actors
+    .filter((a) => a.type === "character" && a.system.baseGrit === 5)
+    .map((a) => ({ _id: a.id, "system.baseGrit": 9 }));
+  if (updates.length) {
+    await Actor.updateDocuments(updates);
+    console.log(`god-tactical | Bumped baseGrit 5→9 on ${updates.length} character(s)`);
+  }
+  await game.settings.set("god-tactical", GRIT_BASE_V9_SETTING, true);
+}
+
 /* -------------------------------------------- */
 /*  Ready Hook                                  */
 /* -------------------------------------------- */
@@ -505,6 +549,9 @@ Hooks.once("ready", async function () {
 
     // Retype any leftover "perk" documents to "ability" (idempotent)
     await migratePerkToAbility();
+
+    // One-shot: existing characters' baseGrit 5→9 (see migrateGritBaseTo9's doc comment)
+    await migrateGritBaseTo9();
 
     // Migrate scenes to the system's grid rules (idempotent — safe to run every
     // load, only writes when a value actually differs):

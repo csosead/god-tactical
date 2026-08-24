@@ -188,7 +188,7 @@ export class CharacterDataModel extends foundry.abstract.TypeDataModel {
       wounds: new ArrayField(new StringField(), { required: true, initial: [] }),
 
       /* --- GRIT cells (Фокус, renamed to "GRIT" — see migrateData below) — every character
-       *  has a flat pool of GOD.BASE_GRIT (currently 5); armor grants no bonus on top of
+       *  has a flat pool of GOD.BASE_GRIT (currently 9); armor grants no bonus on top of
        *  it (see module/combat/wounds.mjs's getGritCells). Lit by default, two independent
        *  counts over the same row of boxes: gritFilled (dim, click on a box to mark/undo —
        *  same fill/undo semantics as the wound track) anchored to the right edge, and

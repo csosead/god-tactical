@@ -1478,15 +1478,12 @@
   filter: grayscale(1);
 }
 
-/* Edit-mode-only "+"/"-" pair at the end of a GRIT/Жизни row (grit-track.hbs/wound-
- * track.hbs) — raise/lower that track's own MAX by one (system.baseGrit/gritMax, or the
- * attached species item's woundSteps — see actor-sheet.mjs's/npc-sheet.mjs's
- * #onGritMaxAddClick/#onGritMaxSubtractClick/#onWoundMaxAddClick/#onWoundMaxSubtractClick).
- * Same 24×24 footprint as .grit-mark/.wound-mark so they sit inline with them, but a
- * dashed outline instead of a filled glyph — reads as "adjust the slot count", not as a
- * state of an existing one. */
-.god-tactical .grit-max-add,
-.god-tactical .grit-max-sub,
+/* Edit-mode-only "+"/"-" pair at the end of a Жизни row (wound-track.hbs) — raise/lower
+ * the attached species item's woundSteps by one (see actor-sheet.mjs's/npc-sheet.mjs's
+ * #onWoundMaxAddClick/#onWoundMaxSubtractClick). GRIT's own max no longer uses buttons
+ * — LMB/RMB directly on .grit-counter-max instead, see further down. Same 24×24
+ * footprint as .wound-mark so they sit inline with it, but a dashed outline instead of
+ * a filled glyph — reads as "adjust the slot count", not as a state of an existing one. */
 .god-tactical .wound-max-add,
 .god-tactical .wound-max-sub {
   width: 24px;
@@ -1503,8 +1500,6 @@
   padding: 0;
   transition: color 0.15s, border-color 0.15s;
 }
-.god-tactical .grit-max-add:hover,
-.god-tactical .grit-max-sub:hover,
 .god-tactical .wound-max-add:hover,
 .god-tactical .wound-max-sub:hover {
   color: var(--ink);
@@ -1522,109 +1517,85 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Same neutral steel idiom as the rank-diamond pips (.skill-rank-mark.filled) instead of
- * blued-steel — one consistent "metal" tone across the whole sheet, no glow. */
-.god-tactical .grit-mark {
-  width: 24px;
-  height: 24px;
+.god-tactical .grit-counter-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  position: relative;
-  color: #a6b4bb;
-  opacity: 1;
-  text-shadow: none;
-  transition: color 0.15s, opacity 0.15s, text-shadow 0.15s;
+  gap: 8px;
 }
 
-/* Клык — replaces the old fa-hexagon glyph, keeping its own painted colors (not tinted
- * via currentColor like a font icon would be) — see the .npc-top-stats override further
- * down for the smaller variant. Sized in em so it scales with .grit-mark's own
- * font-size, same as the fa-hexagon glyph did.
- *
- * 12 distinct fang sprites (assets/images/grit-teeth/tooth-1..12.png), one per box —
- * --tooth-img is set per box below via :nth-child and consumed both here and by the
- * "cracked" mask further down, so the crimson overlay always matches THIS box's own
- * fang silhouette instead of a mismatched shared one. The nth-child→tooth mapping is
- * shuffled on purpose (not tooth-1, tooth-2, tooth-3…) so a run of GRIT boxes doesn't
- * read as a mechanical left-to-right sequence — just a handful of different fangs from
- * the set. Cycles every 12 boxes for a GRIT pool bigger than the sprite set; boxes past
- * the first 12 also get grayscaled (see the :nth-child(n+13) rule below) since they're
- * reusing art. */
-.god-tactical .grit-icon {
+/* Клык-mask badge — full-size icon to the left of the counter (2026-08-24, replaced
+ * both the old one-fang-per-cell row AND the "GRIT" text label — the mask alone now
+ * carries the identity; hover it for the name, see grit-track.hbs's data-tooltip). Own
+ * painted colors, not tinted via currentColor. */
+.god-tactical .grit-icon-badge {
   display: block;
-  width: 1em;
-  height: 1em;
-  position: relative;
-  background-image: var(--tooth-img, url("../assets/images/grit-teeth/tooth-1.png"));
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  background-image: url("../assets/images/grit-mask.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
 }
-.god-tactical .grit-mark:nth-child(12n+1)  { --tooth-img: url("../assets/images/grit-teeth/tooth-7.png"); }
-.god-tactical .grit-mark:nth-child(12n+2)  { --tooth-img: url("../assets/images/grit-teeth/tooth-2.png"); }
-.god-tactical .grit-mark:nth-child(12n+3)  { --tooth-img: url("../assets/images/grit-teeth/tooth-11.png"); }
-.god-tactical .grit-mark:nth-child(12n+4)  { --tooth-img: url("../assets/images/grit-teeth/tooth-5.png"); }
-.god-tactical .grit-mark:nth-child(12n+5)  { --tooth-img: url("../assets/images/grit-teeth/tooth-9.png"); }
-.god-tactical .grit-mark:nth-child(12n+6)  { --tooth-img: url("../assets/images/grit-teeth/tooth-1.png"); }
-.god-tactical .grit-mark:nth-child(12n+7)  { --tooth-img: url("../assets/images/grit-teeth/tooth-12.png"); }
-.god-tactical .grit-mark:nth-child(12n+8)  { --tooth-img: url("../assets/images/grit-teeth/tooth-4.png"); }
-.god-tactical .grit-mark:nth-child(12n+9)  { --tooth-img: url("../assets/images/grit-teeth/tooth-8.png"); }
-.god-tactical .grit-mark:nth-child(12n+10) { --tooth-img: url("../assets/images/grit-teeth/tooth-3.png"); }
-.god-tactical .grit-mark:nth-child(12n+11) { --tooth-img: url("../assets/images/grit-teeth/tooth-10.png"); }
-.god-tactical .grit-mark:nth-child(12n+12) { --tooth-img: url("../assets/images/grit-teeth/tooth-6.png"); }
-/* Sprite set only covers 12 — past that, boxes reuse a fang's art but read as "used up
- * the unique set" via grayscale, instead of silently repeating in full color as if
- * nothing changed. */
-.god-tactical .grit-mark:nth-child(n+13) .grit-icon {
-  filter: grayscale(1);
-}
-.god-tactical .grit-mark:hover { opacity: 0.85; }
 
-/* Потраченная — clicked/used, goes dark right→left as you click further along. Dims via
- * opacity alone now (no `color` tint left to drive — the icon keeps its own colors). */
-.god-tactical .grit-mark.state-filled {
-  opacity: 0.35;
+/* Numeric GRIT counter — fixed footprint at any pool size. LMB/RMB directly on the
+ * value/max spans spend-restore / lower-raise, no buttons — see actor-sheet.mjs's/
+ * npc-sheet.mjs's #onGritWholeClick/#onGritWholeContextMenu/#onGritMaxClick/
+ * #onGritMaxContextMenu. */
+.god-tactical .grit-counter-value,
+.god-tactical .grit-counter-max {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+.god-tactical .grit-counter-value:hover,
+.god-tactical .grit-counter-max:hover {
+  background: rgba(255,255,255,0.08);
 }
 
-/* Треснувшая — broken. The tooth keeps its own colors; a translucent crimson layer (same
- * silhouette, masked from the same art, unified with the wound-track's own var(--blood))
- * sits on top instead of recoloring it outright, so "damage" still reads as red without
- * discarding the painted art underneath. */
-.god-tactical .grit-mark.state-cracked .grit-icon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: var(--blood);
-  opacity: 0.55;
-  -webkit-mask-image: var(--tooth-img, url("../assets/images/grit-teeth/tooth-1.png"));
-          mask-image: var(--tooth-img, url("../assets/images/grit-teeth/tooth-1.png"));
-  -webkit-mask-size: contain;
-          mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
+.god-tactical .grit-counter-value {
+  min-width: 1.4em;
+  padding: 1px 3px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  color: #a6b4bb;
 }
-.god-tactical .grit-mark.state-cracked {
-  opacity: 1;
+.god-tactical .grit-counter-sep {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.god-tactical .grit-counter-max {
+  padding: 1px 4px;
+  font-size: 14px;
+  color: var(--ink-3);
 }
 
-.god-tactical .grit-mark .grit-crack-badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #b03030;
-  color: #fff;
-  font-size: 8px;
+/* Треснуло — count of broken cells. Its own small always-visible indicator (so its
+ * LMB-repair/RMB-break gestures never collide with the value/max spans' own meanings)
+ * — dim/muted at 0, red once something's actually broken (.has-cracked). */
+.god-tactical .grit-cracked-indicator {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.god-tactical .grit-cracked-indicator:hover {
+  background: rgba(255,255,255,0.1);
+}
+.god-tactical .grit-cracked-indicator.has-cracked {
+  background: rgba(176,48,48,0.18);
+  color: var(--blood, #cc3333);
+}
+.god-tactical .grit-cracked-indicator.has-cracked:hover {
+  background: rgba(176,48,48,0.32);
 }
 
 /* ============================================ */
@@ -3967,20 +3938,22 @@
   height: 14px;
   font-size: 11px;
 }
-.god-tactical .npc-top-stats .grit-mark {
-  width: 14px;
-  height: 14px;
-  font-size: 11px;
+.god-tactical .npc-top-stats .grit-icon-badge {
+  width: 20px;
+  height: 20px;
 }
-.god-tactical .npc-top-stats .grit-mark .grit-crack-badge {
-  width: 8px;
-  height: 8px;
-  font-size: 6px;
-  top: -2px;
-  right: -2px;
+.god-tactical .npc-top-stats .grit-counter-value {
+  font-size: 13px;
+  min-width: 1.2em;
 }
-.god-tactical .npc-top-stats .grit-max-add,
-.god-tactical .npc-top-stats .grit-max-sub,
+.god-tactical .npc-top-stats .grit-counter-sep,
+.god-tactical .npc-top-stats .grit-counter-max {
+  font-size: 10px;
+}
+.god-tactical .npc-top-stats .grit-cracked-indicator {
+  font-size: 9px;
+  padding: 1px 4px;
+}
 .god-tactical .npc-top-stats .wound-max-add,
 .god-tactical .npc-top-stats .wound-max-sub {
   width: 14px;

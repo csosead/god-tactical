@@ -406,12 +406,14 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
   }
 
   /** "GRIT" cell block — NPCs no longer have armor at all, so this is a flat GM-set
-   *  max (system.gritMax) instead of anything armor-derived. */
+   *  max (system.gritMax) instead of anything armor-derived. Falls back to a zeroed
+   *  shape (not just {hasGrit:false}) when gritMax is 0 — see actor-sheet.mjs's
+   *  identical method for why. */
   #prepareGritTrack() {
     const grit = getGritCells(this.document);
-    if (!grit) return { hasGrit: false };
+    if (!grit) return { hasGrit: false, whole: 0, filled: 0, cracked: 0, count: 0 };
 
-    return { hasGrit: true, boxes: grit.boxes };
+    return { hasGrit: true, ...grit };
   }
 
   /* -------------------------------------------- */
@@ -576,18 +578,20 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
     // Incapacitated glow lives on .grit-track, not .wound-track — see #syncIncapacitatedGlow.
     this.#syncIncapacitatedGlow(!!context.woundTrack?.incapacitated);
 
-    // GRIT cell marks: left-click toggles the lit/dark count; right-click
-    // toggles the cracked (red) count — see #onGritMarkClick/#onGritCrackClick.
-    this.element.querySelectorAll(".grit-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onGritMarkClick.bind(this));
-      mark.addEventListener("contextmenu", this.#onGritCrackClick.bind(this));
-    });
+    // GRIT counter: LMB/RMB directly on the whole-value spends/restores one point, LMB/RMB
+    // on the max lowers/raises the pool by one, LMB/RMB on the cracked indicator repairs/
+    // breaks one — see #onGritWholeClick/#onGritWholeContextMenu/#onGritMaxClick/
+    // #onGritMaxContextMenu/#onGritCrackRepairClick/#onGritCrackBreakClick.
+    this.element.querySelector(".grit-counter-value")?.addEventListener("click", this.#onGritWholeClick.bind(this));
+    this.element.querySelector(".grit-counter-value")?.addEventListener("contextmenu", this.#onGritWholeContextMenu.bind(this));
+    this.element.querySelector(".grit-counter-max")?.addEventListener("click", this.#onGritMaxClick.bind(this));
+    this.element.querySelector(".grit-counter-max")?.addEventListener("contextmenu", this.#onGritMaxContextMenu.bind(this));
+    this.element.querySelector(".grit-cracked-indicator")?.addEventListener("click", this.#onGritCrackRepairClick.bind(this));
+    this.element.querySelector(".grit-cracked-indicator")?.addEventListener("contextmenu", this.#onGritCrackBreakClick.bind(this));
 
-    // Edit-mode "+"/"-" buttons: raise/lower the GRIT/Жизни MAX by one (system.gritMax /
-    // the attached creature-or-race item's system.woundSteps) — see
-    // #onGritMaxAddClick/#onGritMaxSubtractClick/#onWoundMaxAddClick/#onWoundMaxSubtractClick.
-    this.element.querySelector(".grit-max-add")?.addEventListener("click", this.#onGritMaxAddClick.bind(this));
-    this.element.querySelector(".grit-max-sub")?.addEventListener("click", this.#onGritMaxSubtractClick.bind(this));
+    // Edit-mode "+"/"-" buttons: raise/lower the Жизни MAX by one (the attached
+    // creature-or-race item's system.woundSteps) — see #onWoundMaxAddClick/
+    // #onWoundMaxSubtractClick. GRIT's own max no longer uses buttons (see above).
     this.element.querySelector(".wound-max-add")?.addEventListener("click", this.#onWoundMaxAddClick.bind(this));
     this.element.querySelector(".wound-max-sub")?.addEventListener("click", this.#onWoundMaxSubtractClick.bind(this));
 
@@ -1065,50 +1069,76 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
     }).catch(() => null);
   }
 
-  /** GRIT-cell track: cells are lit by default and go dark right→left as they're
-   *  used, same fill/undo semantics as the wound track. Does not touch the cracked (red)
-   *  count. */
-  async #onGritMarkClick(event) {
+  /** LMB on the GRIT whole-value: spends one point — see actor-sheet.mjs's identical
+   *  method for the full rationale. */
+  async #onGritWholeClick(event) {
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
     const grit = getGritCells(this.document);
     if (!grit) return;
-    const j = grit.count - 1 - index;
     const filled = this.document.system.gritFilled ?? 0;
-    const next = j < filled ? j : j + 1;
-    // Cell going dark (grit absorbing a hit) vs. relighting (repair/undo) — different
-    // sounds/effects for each direction: a hit rattles the portrait, a repair sparks it.
-    if (next > filled) {
-      playSound("systems/god-tactical/assets/sounds/armor-hit.mp3");
-      shakeElement(this.element.querySelector(".npc-portrait"));
-    } else if (next < filled) {
-      playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
-      sparkRepair(this.element.querySelector(".npc-portrait"));
-    }
+    const next = Math.min(grit.count - grit.cracked, filled + 1);
+    if (next === filled) return;
+    playSound("systems/god-tactical/assets/sounds/armor-hit.mp3");
+    shakeElement(this.element.querySelector(".npc-portrait"));
     await this.document.update({ "system.gritFilled": next }, { render: false });
     await this.#patchGritTrack();
   }
 
-  /** Right-click on a GRIT cell: breaks/repairs the cracked (red) count — see
-   *  actor-sheet.mjs's identical method for the full rationale. Never touches
-   *  gritFilled. */
-  async #onGritCrackClick(event) {
+  /** RMB on the GRIT whole-value: restores one spent point. */
+  async #onGritWholeContextMenu(event) {
     event.preventDefault();
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
+    const filled = this.document.system.gritFilled ?? 0;
+    const next = Math.max(0, filled - 1);
+    if (next === filled) return;
+    playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
+    sparkRepair(this.element.querySelector(".npc-portrait"));
+    await this.document.update({ "system.gritFilled": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** LMB on the GRIT max: lowers the GM-set pool (system.gritMax) by one — always live,
+   *  not gated behind edit mode (unlike the "+"/"-" buttons this replaced). */
+  async #onGritMaxClick(event) {
+    event.stopPropagation();
+    const next = Math.max(0, (this.document.system.gritMax ?? 0) - 1);
+    await this.document.update({ "system.gritMax": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** RMB on the GRIT max: raises the GM-set pool by one. No rendered ceiling. */
+  async #onGritMaxContextMenu(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const next = (this.document.system.gritMax ?? 0) + 1;
+    await this.document.update({ "system.gritMax": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** LMB on the cracked indicator: repairs one broken cell. */
+  async #onGritCrackRepairClick(event) {
+    event.stopPropagation();
+    const cracked = this.document.system.gritCracked ?? 0;
+    const next = Math.max(0, cracked - 1);
+    if (next === cracked) return;
+    playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
+    sparkRepair(this.element.querySelector(".npc-portrait"));
+    await this.document.update({ "system.gritCracked": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** RMB on the cracked indicator: breaks one more cell — see actor-sheet.mjs's
+   *  identical method for the full rationale. Never touches gritFilled. */
+  async #onGritCrackBreakClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
     const grit = getGritCells(this.document);
     if (!grit) return;
-    const cracked = grit.cracked;
-    const next = index < cracked ? index : index + 1;
-    // Breaking vs. repairing cracked cells — different sounds/effects for each
-    // direction: breaking rattles the portrait, repairing sparks it.
-    if (next > cracked) {
-      playSound("systems/god-tactical/assets/sounds/armor-crack.mp3");
-      shakeElement(this.element.querySelector(".npc-portrait"));
-    } else if (next < cracked) {
-      playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
-      sparkRepair(this.element.querySelector(".npc-portrait"));
-    }
+    const cracked = this.document.system.gritCracked ?? 0;
+    const next = Math.min(grit.count, cracked + 1);
+    if (next === cracked) return;
+    playSound("systems/god-tactical/assets/sounds/armor-crack.mp3");
+    shakeElement(this.element.querySelector(".npc-portrait"));
     await this.document.update({ "system.gritCracked": next }, { render: false });
     await this.#patchGritTrack();
   }
@@ -1135,12 +1165,12 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
       this.element.querySelector(".npc-stat-mini-row")?.insertAdjacentHTML("afterend", html);
     }
 
-    this.element.querySelectorAll(".grit-track .grit-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onGritMarkClick.bind(this));
-      mark.addEventListener("contextmenu", this.#onGritCrackClick.bind(this));
-    });
-    this.element.querySelector(".grit-track .grit-max-add")?.addEventListener("click", this.#onGritMaxAddClick.bind(this));
-    this.element.querySelector(".grit-track .grit-max-sub")?.addEventListener("click", this.#onGritMaxSubtractClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-value")?.addEventListener("click", this.#onGritWholeClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-value")?.addEventListener("contextmenu", this.#onGritWholeContextMenu.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-max")?.addEventListener("click", this.#onGritMaxClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-max")?.addEventListener("contextmenu", this.#onGritMaxContextMenu.bind(this));
+    this.element.querySelector(".grit-track .grit-cracked-indicator")?.addEventListener("click", this.#onGritCrackRepairClick.bind(this));
+    this.element.querySelector(".grit-track .grit-cracked-indicator")?.addEventListener("contextmenu", this.#onGritCrackBreakClick.bind(this));
 
     // A fresh grit-track element has no "incapacitated" class of its own (grit-track.hbs
     // carries no wound-state data) — reapply it here, since outerHTML above just replaced
@@ -1187,28 +1217,6 @@ export class GODNPCSheet extends HandlebarsApplicationMixin(
     });
     this.element.querySelector(".wound-track .wound-max-add")?.addEventListener("click", this.#onWoundMaxAddClick.bind(this));
     this.element.querySelector(".wound-track .wound-max-sub")?.addEventListener("click", this.#onWoundMaxSubtractClick.bind(this));
-  }
-
-  /** Edit-mode "+" on the GRIT block: raises the NPC's own flat GM-set max
-   *  (system.gritMax) by one — see #prepareGritTrack's doc comment (armor grants no GRIT
-   *  at all any more, this flat number is the only source for an NPC). */
-  async #onGritMaxAddClick(event) {
-    event.stopPropagation();
-    const next = (this.document.system.gritMax ?? 0) + 1;
-    await this.document.update({ "system.gritMax": next }, { render: false });
-    await this.#patchGritTrack();
-  }
-
-  /** Edit-mode "-" on the GRIT block — same lever as #onGritMaxAddClick, opposite
-   *  direction, clamped at the field's own schema min (0, data-models.mjs). getGritCells
-   *  (wounds.mjs) already clamps gritFilled/gritCracked down to whatever the new, smaller
-   *  count allows when building the display boxes, so a max drop below either never needs
-   *  a separate fixup here. */
-  async #onGritMaxSubtractClick(event) {
-    event.stopPropagation();
-    const next = Math.max(0, (this.document.system.gritMax ?? 0) - 1);
-    await this.document.update({ "system.gritMax": next }, { render: false });
-    await this.#patchGritTrack();
   }
 
   /** Edit-mode "+" on the Жизни block: raises the attached species item's (Creature or

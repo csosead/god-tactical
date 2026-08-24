@@ -213,7 +213,7 @@ GOD.CHAR_MIN = 40;
 // own initial value (data-models.mjs), a flat total with no armor bonus (see
 // module/combat/wounds.mjs's getGritCells). NPCs have their own flat GM-set total
 // instead (NPCDataModel.gritMax).
-GOD.BASE_GRIT = 5;
+GOD.BASE_GRIT = 9;
 
 /** XP cost of the NEXT single characteristic point, given the value before that point. */
 export function charPointXpCost(currentValue) {

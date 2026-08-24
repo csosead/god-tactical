@@ -556,12 +556,15 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
   }
 
   /** "GRIT" cell block: always present for a Character — a flat base pool, see
-   *  GOD.BASE_GRIT (armor no longer contributes to it). */
+   *  GOD.BASE_GRIT (armor no longer contributes to it). Falls back to a zeroed shape
+   *  (not just {hasGrit:false}) when baseGrit is 0 — the template still renders that in
+   *  edit mode (see its own guard) and the max field's RMB needs a real 0 to count up
+   *  from. */
   #prepareGritTrack() {
     const grit = getGritCells(this.document);
-    if (!grit) return { hasGrit: false };
+    if (!grit) return { hasGrit: false, whole: 0, filled: 0, cracked: 0, count: 0 };
 
-    return { hasGrit: true, boxes: grit.boxes };
+    return { hasGrit: true, ...grit };
   }
 
   /* -------------------------------------------- */
@@ -890,18 +893,20 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
     // this template only sets .grit-track's own state via gritTrack, so it's synced in JS.
     this.#syncIncapacitatedGlow(!!context.woundTrack?.incapacitated);
 
-    // GRIT cell marks: left-click toggles the lit/dark count; right-click
-    // toggles the cracked (red) count — see #onGritMarkClick/#onGritCrackClick.
-    this.element.querySelectorAll(".grit-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onGritMarkClick.bind(this));
-      mark.addEventListener("contextmenu", this.#onGritCrackClick.bind(this));
-    });
+    // GRIT counter: LMB/RMB directly on the whole-value spends/restores one point, LMB/RMB
+    // on the max lowers/raises the pool by one, LMB/RMB on the cracked indicator repairs/
+    // breaks one — see #onGritWholeClick/#onGritWholeContextMenu/#onGritMaxClick/
+    // #onGritMaxContextMenu/#onGritCrackRepairClick/#onGritCrackBreakClick.
+    this.element.querySelector(".grit-counter-value")?.addEventListener("click", this.#onGritWholeClick.bind(this));
+    this.element.querySelector(".grit-counter-value")?.addEventListener("contextmenu", this.#onGritWholeContextMenu.bind(this));
+    this.element.querySelector(".grit-counter-max")?.addEventListener("click", this.#onGritMaxClick.bind(this));
+    this.element.querySelector(".grit-counter-max")?.addEventListener("contextmenu", this.#onGritMaxContextMenu.bind(this));
+    this.element.querySelector(".grit-cracked-indicator")?.addEventListener("click", this.#onGritCrackRepairClick.bind(this));
+    this.element.querySelector(".grit-cracked-indicator")?.addEventListener("contextmenu", this.#onGritCrackBreakClick.bind(this));
 
-    // Edit-mode "+"/"-" buttons: raise/lower the GRIT/Жизни MAX by one (system.baseGrit /
-    // the attached race item's system.woundSteps) — see #onGritMaxAddClick/
-    // #onGritMaxSubtractClick/#onWoundMaxAddClick/#onWoundMaxSubtractClick.
-    this.element.querySelector(".grit-max-add")?.addEventListener("click", this.#onGritMaxAddClick.bind(this));
-    this.element.querySelector(".grit-max-sub")?.addEventListener("click", this.#onGritMaxSubtractClick.bind(this));
+    // Edit-mode "+"/"-" buttons: raise/lower the Жизни MAX by one (the attached race
+    // item's system.woundSteps) — see #onWoundMaxAddClick/#onWoundMaxSubtractClick. GRIT's
+    // own max no longer uses buttons (see above), only Жизни still does.
     this.element.querySelector(".wound-max-add")?.addEventListener("click", this.#onWoundMaxAddClick.bind(this));
     this.element.querySelector(".wound-max-sub")?.addEventListener("click", this.#onWoundMaxSubtractClick.bind(this));
 
@@ -1457,61 +1462,93 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
 
   /* -------------------------------------------- */
 
-  /** GRIT-cell track: cells are lit by default and go dark right→left as they're
-   *  used, same fill/undo semantics as the wound track. Does not touch the cracked (red)
-   *  count. */
-  async #onGritMarkClick(event) {
+  /** LMB on the GRIT whole-value: spends one point (gritFilled + 1), clamped so it
+   *  never eats into cells already cracked. */
+  async #onGritWholeClick(event) {
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
     const grit = getGritCells(this.document);
     if (!grit) return;
-    const j = grit.count - 1 - index;
     const filled = this.document.system.gritFilled ?? 0;
-    const next = j < filled ? j : j + 1;
-    // Cell going dark (grit absorbing a hit) vs. relighting (repair/undo) — different
-    // sounds/effects for each direction: a hit rattles the portrait, a repair sparks it.
-    if (next > filled) {
-      playSound("systems/god-tactical/assets/sounds/armor-hit.mp3");
-      shakeElement(this.element.querySelector(".portrait"));
-    } else if (next < filled) {
-      playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
-      sparkRepair(this.element.querySelector(".portrait"));
-    }
+    const next = Math.min(grit.count - grit.cracked, filled + 1);
+    if (next === filled) return;
+    playSound("systems/god-tactical/assets/sounds/armor-hit.mp3");
+    shakeElement(this.element.querySelector(".portrait"));
     await this.document.update({ "system.gritFilled": next }, { render: false });
     await this.#patchGritTrack();
   }
 
-  /** Right-click on a GRIT cell: breaks/repairs the cracked (red) count, anchored to
-   *  the LEFT edge — same click-to-mark/click-to-undo semantics as the left-click
-   *  filled count above, just growing from the opposite edge and on the opposite mouse
-   *  button, so the two independent counts never fight over the same click. Never
-   *  touches gritFilled. */
-  async #onGritCrackClick(event) {
+  /** RMB on the GRIT whole-value: restores one spent point (gritFilled - 1). */
+  async #onGritWholeContextMenu(event) {
     event.preventDefault();
     event.stopPropagation();
-    const index = parseInt(event.currentTarget.dataset.index, 10);
-    const grit = getGritCells(this.document);
-    if (!grit) return;
-    const cracked = grit.cracked;
-    const next = index < cracked ? index : index + 1;
-    // Breaking vs. repairing cracked cells — different sounds/effects for each
-    // direction: breaking rattles the portrait, repairing sparks it.
-    if (next > cracked) {
-      playSound("systems/god-tactical/assets/sounds/armor-crack.mp3");
-      shakeElement(this.element.querySelector(".portrait"));
-    } else if (next < cracked) {
-      playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
-      sparkRepair(this.element.querySelector(".portrait"));
-    }
+    const filled = this.document.system.gritFilled ?? 0;
+    const next = Math.max(0, filled - 1);
+    if (next === filled) return;
+    playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
+    sparkRepair(this.element.querySelector(".portrait"));
+    await this.document.update({ "system.gritFilled": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** LMB on the GRIT max: lowers the base pool by one (system.baseGrit, GOD.BASE_GRIT's
+   *  per-actor override) — always live, not gated behind edit mode (unlike the "+"/"-"
+   *  buttons this replaced). getGritCells already clamps gritFilled/gritCracked down to
+   *  whatever the new, smaller count allows when building the display, so a drop below
+   *  either never needs a separate fixup here. */
+  async #onGritMaxClick(event) {
+    event.stopPropagation();
+    const next = Math.max(0, (this.document.system.baseGrit ?? 0) - 1);
+    await this.document.update({ "system.baseGrit": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** RMB on the GRIT max: raises the base pool by one — the only lever left for a GM
+   *  (or the player themselves, same as the whole-value clicks above) to hand a
+   *  character a bigger pool than the default 9. No rendered ceiling. */
+  async #onGritMaxContextMenu(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const next = (this.document.system.baseGrit ?? 0) + 1;
+    await this.document.update({ "system.baseGrit": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** LMB on the cracked indicator: repairs one broken cell (gritCracked - 1). Its own
+   *  small always-visible element (dim at 0) so this never collides with the whole/max
+   *  fields' own LMB/RMB meanings. */
+  async #onGritCrackRepairClick(event) {
+    event.stopPropagation();
+    const cracked = this.document.system.gritCracked ?? 0;
+    const next = Math.max(0, cracked - 1);
+    if (next === cracked) return;
+    playSound("systems/god-tactical/assets/sounds/armor-restore.mp3");
+    sparkRepair(this.element.querySelector(".portrait"));
     await this.document.update({ "system.gritCracked": next }, { render: false });
     await this.#patchGritTrack();
   }
 
-  /** Re-render just the "GRIT" block after a click/crack/repair/max-add change, instead
-   *  of the whole sheet (see the render:false calls in #onGritMarkClick/#onGritCrackClick/
-   *  #onGritMaxAddClick). Inserts or removes the block if gritTrack.hasGrit (or edit mode
-   *  — see grit-track.hbs's own guard) flipped, otherwise just replaces its markup with
-   *  freshly computed boxes. */
+  /** RMB on the cracked indicator: breaks one more cell (gritCracked + 1), anchored to
+   *  the LEFT edge — never touches gritFilled. */
+  async #onGritCrackBreakClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const grit = getGritCells(this.document);
+    if (!grit) return;
+    const cracked = this.document.system.gritCracked ?? 0;
+    const next = Math.min(grit.count, cracked + 1);
+    if (next === cracked) return;
+    playSound("systems/god-tactical/assets/sounds/armor-crack.mp3");
+    shakeElement(this.element.querySelector(".portrait"));
+    await this.document.update({ "system.gritCracked": next }, { render: false });
+    await this.#patchGritTrack();
+  }
+
+  /** Re-render just the "GRIT" block after a whole/max/crack change, instead of the
+   *  whole sheet (see the render:false calls in #onGritWholeClick/#onGritWholeContextMenu/
+   *  #onGritMaxClick/#onGritMaxContextMenu/#onGritCrackRepairClick/#onGritCrackBreakClick).
+   *  Inserts or removes the block if gritTrack.hasGrit (or edit mode — see
+   *  grit-track.hbs's own guard) flipped, otherwise just replaces its markup with the
+   *  freshly computed count. */
   async #patchGritTrack() {
     const gritTrack = this.#prepareGritTrack();
     const editMode = !!this.document.getFlag("god-tactical", "editMode");
@@ -1535,40 +1572,17 @@ export class GODActorSheet extends HandlebarsApplicationMixin(
       this.element.querySelector(".flesh-row")?.insertAdjacentHTML("afterbegin", html);
     }
 
-    this.element.querySelectorAll(".grit-track .grit-mark").forEach((mark) => {
-      mark.addEventListener("click", this.#onGritMarkClick.bind(this));
-      mark.addEventListener("contextmenu", this.#onGritCrackClick.bind(this));
-    });
-    this.element.querySelector(".grit-track .grit-max-add")?.addEventListener("click", this.#onGritMaxAddClick.bind(this));
-    this.element.querySelector(".grit-track .grit-max-sub")?.addEventListener("click", this.#onGritMaxSubtractClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-value")?.addEventListener("click", this.#onGritWholeClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-value")?.addEventListener("contextmenu", this.#onGritWholeContextMenu.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-max")?.addEventListener("click", this.#onGritMaxClick.bind(this));
+    this.element.querySelector(".grit-track .grit-counter-max")?.addEventListener("contextmenu", this.#onGritMaxContextMenu.bind(this));
+    this.element.querySelector(".grit-track .grit-cracked-indicator")?.addEventListener("click", this.#onGritCrackRepairClick.bind(this));
+    this.element.querySelector(".grit-track .grit-cracked-indicator")?.addEventListener("contextmenu", this.#onGritCrackBreakClick.bind(this));
 
     // A fresh grit-track element has no "incapacitated" class of its own (grit-track.hbs
     // carries no wound-state data) — reapply it here, since outerHTML above just replaced
     // whatever element (and classes) were there before.
     this.#syncIncapacitatedGlow(!!this.#prepareWoundTrack().incapacitated);
-  }
-
-  /** Edit-mode "+" on the GRIT block: raises the Character's own base pool
-   *  (system.baseGrit, GOD.BASE_GRIT's per-actor override) by one — armor no longer
-   *  contributes to GRIT at all (see #prepareGritTrack's doc comment), so this is the
-   *  only lever for a GM to hand a character a bigger pool than the default 5. */
-  async #onGritMaxAddClick(event) {
-    event.stopPropagation();
-    const next = (this.document.system.baseGrit ?? 0) + 1;
-    await this.document.update({ "system.baseGrit": next }, { render: false });
-    await this.#patchGritTrack();
-  }
-
-  /** Edit-mode "-" on the GRIT block — same lever as #onGritMaxAddClick, opposite
-   *  direction, clamped at the field's own schema min (0, data-models.mjs). getGritCells
-   *  (wounds.mjs) already clamps gritFilled/gritCracked down to whatever the new, smaller
-   *  count allows when building the display boxes, so a max drop below either never needs
-   *  a separate fixup here. */
-  async #onGritMaxSubtractClick(event) {
-    event.stopPropagation();
-    const next = Math.max(0, (this.document.system.baseGrit ?? 0) - 1);
-    await this.document.update({ "system.baseGrit": next }, { render: false });
-    await this.#patchGritTrack();
   }
 
   /** Edit-mode "+" on the Жизни block: raises the attached Race item's own woundSteps by

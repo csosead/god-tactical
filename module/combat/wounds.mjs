@@ -41,13 +41,6 @@ export function computeWoundState(actor) {
   };
 }
 
-/** Hover tooltip for a GRIT-cell box, by state. */
-export function gritBoxTitle(state) {
-  if (state === "cracked") return "Треснувшая — ПКМ чинит до сюда";
-  if (state === "filled")  return "Потухшая — клик восстанавливает до сюда, ПКМ ломает до сюда";
-  return "Целая — горит по умолчанию, клик тушит до сюда, ПКМ ломает до сюда";
-}
-
 /**
  * Total "GRIT" cells for an actor. Armor doesn't grant GRIT at all anymore (a fully
  * retired mechanic, not just an NPC/Character split) — the total is a flat number for
@@ -60,30 +53,33 @@ export function gritBoxTitle(state) {
  *    silently break again for the next NPC-like actor type that gets bolted onto
  *    NPCDataModel the same way Creature was.
  * Returns null if the total is 0 (gritMax left at 0 — a Character always has at least
- * its base pool, so this is effectively always non-null for them). Two independent
- * counts share the same row of boxes, cells are lit by default:
- *  - gritFilled (dim): plain click-to-mark/click-to-undo count, anchored to the right
- *    edge — goes dark right→left as cells are used.
- *  - gritCracked (red): right-click to break/repair, anchored to the left edge —
- *    breaking grows it left→right, repairing shrinks it right→left.
- * A box within both ranges reads as cracked (worse state wins).
- *  - count: total cells
- *  - boxes: [{ index, state: "whole" | "filled" | "cracked" }]
+ * its base pool, so this is effectively always non-null for them).
+ *
+ * Rendered as a numeric counter (2026-08-24 — replaced the old one-box-per-point fang
+ * row, which stretched the card taller as baseGrit grew instead of staying a fixed
+ * footprint), but the underlying two independent counts are unchanged:
+ *  - gritFilled (dim): "spent", anchored to the right edge.
+ *  - gritCracked (red): "broken", anchored to the left edge.
+ * A cell within both ranges reads as cracked (worse state wins) — `filled` below is
+ * the box-count that actually shows as filled AFTER that overlap resolves, which can
+ * be less than the raw stored gritFilled once cracked eats into the same cells.
+ *  - count:   total cells
+ *  - whole:   undamaged, unspent — the number a player reads as "GRIT I have left"
+ *  - filled:  spent (click to restore)
+ *  - cracked: broken (click to repair)
  */
 export function getGritCells(actor) {
   const count = actor?.type === "character" ? (actor?.system?.baseGrit ?? 0) : (actor?.system?.gritMax ?? 0);
   if (count <= 0) return null;
 
-  const filled = Math.min(count, actor.system.gritFilled ?? 0);
+  const filledRaw = Math.min(count, actor.system.gritFilled ?? 0);
   const cracked = Math.min(count, actor.system.gritCracked ?? 0);
 
-  const boxes = [];
+  let filled = 0;
   for (let i = 0; i < count; i++) {
-    const isCracked = i < cracked;
-    const isFilled = !isCracked && i >= count - filled;
-    const state = isCracked ? "cracked" : isFilled ? "filled" : "whole";
-    boxes.push({ index: i, state, title: gritBoxTitle(state) });
+    if (i >= cracked && i >= count - filledRaw) filled++;
   }
+  const whole = count - cracked - filled;
 
-  return { count, cracked, boxes };
+  return { count, whole, filled, cracked };
 }
